@@ -8,6 +8,7 @@ class GameMainScene : public AbstractScene
 {
 private:
 	Player player;
+	int Level;	//ステージ数
 
 public:
 	GameMainScene();

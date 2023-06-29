@@ -22,17 +22,17 @@ void Player::Update() {
 	InitPad();
 	int BlockSize = BLOCK_SIZE;
 
-	float MaxSpeed = 2.5;
+	float MaxSpeed = 2.3;
 
 	if (Ground || AirMove)
 	{
 		if (PadX >= 0.3) {
-			if (Speed < 0 && Ground)Speed += 0.6;
+			if (Speed < 0 && Ground)Speed += 0.2;
 			Speed += 0.2;
 			if (MaxSpeed < Speed)Speed = MaxSpeed;
 		}
 		else if (PadX <= -0.3) {
-			if (0 < Speed && Ground)Speed -= 0.6;
+			if (0 < Speed && Ground)Speed -= 0.2;
 			Speed -= 0.2;
 			if (Speed < -MaxSpeed)Speed = -MaxSpeed;
 		}
@@ -40,12 +40,12 @@ void Player::Update() {
 		{
 			if (0 < Speed)
 			{
-				Speed -= 0.4;
+				Speed -= 0.2;
 				if (Speed < 0)Speed = 0;
 			}
 			else if (Speed < 0)
 			{
-				Speed += 0.4;
+				Speed += 0.2;
 				if (0 < Speed)Speed = 0;
 			}
 		}
@@ -119,7 +119,8 @@ void Player::Update() {
 
 	//床で落下が阻まれる
 	while (MapData[(int)(Y + Height) / BlockSize][(int)LeftX / BlockSize] > 0 ||
-		   MapData[(int)(Y + Height) / BlockSize][(int)RightX / BlockSize] > 0)
+		   MapData[(int)(Y + Height) / BlockSize][(int)RightX / BlockSize] > 0 ||
+		   SCREEN_HEIGHT <= Y + Height)
 	{
 		Y-=0.1;
 		Ground = true;
