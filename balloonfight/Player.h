@@ -10,8 +10,8 @@ private:
 	float LeftX, RightX;	//プレイヤーの左右端座標
 
 	//プレイヤーサイズ
-	float Width = BLOCK_SIZE / 2;
-	float Height = BLOCK_SIZE / 2;
+	float Width = 19 / 2;
+	float Height = 25 / 2;
 
 	float Speed;	//移動速度
 	int AirMove;	//空中での左右移動受付

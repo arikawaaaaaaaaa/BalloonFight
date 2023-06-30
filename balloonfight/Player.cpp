@@ -6,7 +6,7 @@
 
 Player::Player() {
 	X = BLOCK_SIZE * 5 + Width;
-	Y = BLOCK_SIZE * 25 + Height - 2;
+	Y = BLOCK_SIZE * 20 - Height;
 
 	LeftX = X - Width;
 	RightX = X + Width;
@@ -60,6 +60,7 @@ void Player::Update() {
 	bool WallHit = false;
 	//壁で移動を止める
 	while (MapData[(int)(Y - Height) / BlockSize][(int)RightX / BlockSize] > 0 ||
+		   MapData[(int)Y / BlockSize][(int)RightX / BlockSize] > 0 ||
 		   MapData[(int)(Y + Height) / BlockSize][(int)RightX / BlockSize] > 0)
 	{
 		X--;
@@ -67,6 +68,7 @@ void Player::Update() {
 		WallHit = true;
 	}
 	while (MapData[(int)(Y - Height) / BlockSize][(int)LeftX / BlockSize] > 0 ||
+		   MapData[(int)Y / BlockSize][(int)LeftX / BlockSize] > 0 ||
 		   MapData[(int)(Y + Height) / BlockSize][(int)LeftX / BlockSize] > 0)
 	{
 		X++;
@@ -103,10 +105,11 @@ void Player::Update() {
 	WallHit = false;
 	//天井でジャンプが阻まれる
 	while (MapData[(int)(Y - Height) / BlockSize][(int)LeftX / BlockSize] > 0 ||
+		   MapData[(int)(Y - Height) / BlockSize][(int)X / BlockSize] > 0 ||
 		   MapData[(int)(Y - Height) / BlockSize][(int)RightX / BlockSize] > 0 ||
 		   Y - Height <= 0)
 	{
-		Y+=0.1;
+		Y += 0.1;
 		WallHit = true;
 	}
 
@@ -119,10 +122,11 @@ void Player::Update() {
 
 	//床で落下が阻まれる
 	while (MapData[(int)(Y + Height) / BlockSize][(int)LeftX / BlockSize] > 0 ||
+		   MapData[(int)(Y + Height) / BlockSize][(int)X / BlockSize] > 0 ||
 		   MapData[(int)(Y + Height) / BlockSize][(int)RightX / BlockSize] > 0 ||
 		   SCREEN_HEIGHT <= Y + Height)
 	{
-		Y-=0.1;
+		Y -= 0.1;
 		Ground = true;
 		if (fall > 0.f)
 		{

@@ -5,12 +5,12 @@
 #define SCREEN_WIDTH 640
 
 //ゲーム画面のサイズ
-#define GAME_WIDTH 512
+#define GAME_WIDTH 608
 
 #define SCREEN_COLOR_BIT_16 16
 
 //マップブロック数(縦・横)
-#define MAP_HEIGHT 30
+#define MAP_HEIGHT 25 //25?
 #define MAP_WIDTH 32
 
 //UI枠のサイズ
