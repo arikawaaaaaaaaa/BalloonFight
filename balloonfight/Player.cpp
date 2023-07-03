@@ -15,6 +15,8 @@ Player::Player() {
 	fall = 1;
 
 	JumpCount = 0;
+
+	LoadDivGraph("images/player.png", 30, 8, 4, 64, 64, Image);
 }
 
 void Player::Update() {
@@ -28,12 +30,16 @@ void Player::Update() {
 	{
 		if (PadX >= 0.3) {
 			if (Speed < 0 && Ground)Speed += 0.2;
+			Turn = true;
 			Speed += 0.2;
+			Anim++;
 			if (MaxSpeed < Speed)Speed = MaxSpeed;
 		}
 		else if (PadX <= -0.3) {
 			if (0 < Speed && Ground)Speed -= 0.2;
+			Turn = false;
 			Speed -= 0.2;
+			Anim++;
 			if (Speed < -MaxSpeed)Speed = -MaxSpeed;
 		}
 		else if (Ground)
@@ -48,6 +54,7 @@ void Player::Update() {
 				Speed += 0.2;
 				if (0 < Speed)Speed = 0;
 			}
+			Anim = 0;
 		}
 	}
 
@@ -76,7 +83,7 @@ void Player::Update() {
 		WallHit = true;
 	}
 
-	if (WallHit)Speed *= -1;
+	if (WallHit)Speed *= -0.9;
 
 	float JumpPow = -0.1;	//ジャンプ力
 	float FallMax = -JumpPow * 21;		//落下の最大速度
@@ -122,9 +129,9 @@ void Player::Update() {
 
 	//床で落下が阻まれる
 	while (MapData[(int)(Y + Height) / BlockSize][(int)LeftX / BlockSize] > 0 ||
-		   MapData[(int)(Y + Height) / BlockSize][(int)X / BlockSize] > 0 ||
-		   MapData[(int)(Y + Height) / BlockSize][(int)RightX / BlockSize] > 0 ||
-		   SCREEN_HEIGHT <= Y + Height)
+		MapData[(int)(Y + Height) / BlockSize][(int)X / BlockSize] > 0 ||
+		MapData[(int)(Y + Height) / BlockSize][(int)RightX / BlockSize] > 0 ||
+		SCREEN_HEIGHT <= Y + Height + 1)
 	{
 		Y -= 0.1;
 		Ground = true;
@@ -134,6 +141,7 @@ void Player::Update() {
 		}
 	}
 
+	GameTime++;
 }
 
 void Player::FixX() 
@@ -152,9 +160,29 @@ void Player::FixX()
 }
 
 void Player::Draw() const {
-	DrawBox(SIDE_MARGIN + X - Width, Y - Height, SIDE_MARGIN + X + Width, Y + Height, 0xff0000, true);
-	DrawBox(SIDE_MARGIN + X - Width - GAME_WIDTH, Y - Height, SIDE_MARGIN + X + Width - GAME_WIDTH, Y + Height, 0xff0000, true);
-	DrawBox(SIDE_MARGIN + X - Width + GAME_WIDTH, Y - Height, SIDE_MARGIN + X + Width + GAME_WIDTH, Y + Height, 0xff0000, true);
+	//DrawBox(SIDE_MARGIN + X - Width, Y - Height, SIDE_MARGIN + X + Width, Y + Height, 0xff0000, true);
+	//DrawBox(SIDE_MARGIN + X - Width - GAME_WIDTH, Y - Height, SIDE_MARGIN + X + Width - GAME_WIDTH, Y + Height, 0xff0000, true);
+	//DrawBox(SIDE_MARGIN + X - Width + GAME_WIDTH, Y - Height, SIDE_MARGIN + X + Width + GAME_WIDTH, Y + Height, 0xff0000, true);
+
+	//プレイヤー描画
+	int Move = 0;
+
+	//待機
+	if (Speed == 0)
+	{
+		Move = GameTime / 25 % 3;
+		DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[Move], true, Turn);
+		
+	}
+	//地面を走る
+	else if (Ground)
+	{
+		Move = Anim / 5 % 3;
+		if ((PadX > -0.3 && 0.3 > PadX) ||
+			 (Speed < 0 && PadX >= 0.3) ||
+			 (0 < Speed && -0.3 >= PadX)) DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[11], true, Turn);
+		else DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[8 + Move], true, Turn);
+	}
 
 	DrawCircle(LeftX + SIDE_MARGIN, Y, 2, 0x00ff00, true);
 	DrawCircle(RightX + SIDE_MARGIN, Y, 2, 0x00ff00, true);

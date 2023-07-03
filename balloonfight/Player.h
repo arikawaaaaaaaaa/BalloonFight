@@ -14,6 +14,7 @@ private:
 	float Height = 25 / 2;
 
 	float Speed;	//移動速度
+	bool Turn = true;		//左右反転
 	int AirMove;	//空中での左右移動受付
 	float fall;		//落下速度
 
@@ -21,6 +22,11 @@ private:
 	bool Ground = true;	//地面にいるか？
 
 	float PadX;	//横方向入力値
+
+	int Image[30];	//画像
+	int Anim = 0;	//アニメーション管理
+
+	int GameTime = 0;	//経過時間
 
 	int MapData[MAP_HEIGHT][MAP_WIDTH];	//マップデータ
 
