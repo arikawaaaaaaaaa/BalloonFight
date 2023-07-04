@@ -66,21 +66,44 @@ void Player::Update() {
 
 	bool WallHit = false;
 	//壁で移動を止める
-	while (MapData[(int)(Y - Height) / BlockSize][(int)RightX / BlockSize] > 0 ||
-		   MapData[(int)Y / BlockSize][(int)RightX / BlockSize] > 0 ||
-		   MapData[(int)(Y + Height) / BlockSize][(int)RightX / BlockSize] > 0)
+	bool Wall = false;
+	for (float i = 0; i < Height && !Wall; i++)
+	{
+		if (MapData[(int)(Y + i) / BlockSize][(int)RightX / BlockSize] > 0) Wall = true;
+		if (MapData[(int)(Y - i) / BlockSize][(int)RightX / BlockSize] > 0) Wall = true;
+	}
+	while (Wall)
 	{
 		X--;
 		FixX();
 		WallHit = true;
+
+		Wall = false;
+		for (float i = 0; i < Height && !Wall; i++)
+		{
+			if (MapData[(int)(Y + i) / BlockSize][(int)RightX / BlockSize] > 0) Wall = true;
+			if (MapData[(int)(Y - i) / BlockSize][(int)RightX / BlockSize] > 0) Wall = true;
+		}
 	}
-	while (MapData[(int)(Y - Height) / BlockSize][(int)LeftX / BlockSize] > 0 ||
-		   MapData[(int)Y / BlockSize][(int)LeftX / BlockSize] > 0 ||
-		   MapData[(int)(Y + Height) / BlockSize][(int)LeftX / BlockSize] > 0)
+
+	Wall = false;
+	for (float i = 0; i < Height && !Wall; i++)
+	{
+		if (MapData[(int)(Y + i) / BlockSize][(int)LeftX / BlockSize] > 0) Wall = true;
+		if (MapData[(int)(Y - i) / BlockSize][(int)LeftX / BlockSize] > 0) Wall = true;
+	}
+	while (Wall)
 	{
 		X++;
 		FixX();
 		WallHit = true;
+
+		Wall = false;
+		for (float i = 0; i < Height && !Wall; i++)
+		{
+			if (MapData[(int)(Y + i) / BlockSize][(int)LeftX / BlockSize] > 0) Wall = true;
+			if (MapData[(int)(Y - i) / BlockSize][(int)LeftX / BlockSize] > 0) Wall = true;
+		}
 	}
 
 	if (WallHit)Speed *= -0.9;
@@ -91,6 +114,7 @@ void Player::Update() {
 	if (!JumpCount && (PAD_INPUT::OnButton(XINPUT_BUTTON_B) || PAD_INPUT::OnPressed(XINPUT_BUTTON_A)))
 	{
 		JumpCount = 12;
+		Anim = 0;
 		//if (Ground)fall = JumpPow * 12;
 		if (PadX >= 0.3 || PadX <= -0.3)AirMove = 12;
 	}
@@ -103,6 +127,7 @@ void Player::Update() {
 	else 
 	{
 		fall += 0.1;
+		Anim++;
 		if (FallMax < fall)fall = FallMax;
 	}
 	Y += fall;
@@ -131,7 +156,7 @@ void Player::Update() {
 	while (MapData[(int)(Y + Height) / BlockSize][(int)LeftX / BlockSize] > 0 ||
 		MapData[(int)(Y + Height) / BlockSize][(int)X / BlockSize] > 0 ||
 		MapData[(int)(Y + Height) / BlockSize][(int)RightX / BlockSize] > 0 ||
-		SCREEN_HEIGHT <= Y + Height + 1)
+		SCREEN_HEIGHT + BLOCK_SIZE * 2 <= Y + Height + 1)
 	{
 		Y -= 0.1;
 		Ground = true;
@@ -167,11 +192,25 @@ void Player::Draw() const {
 	//プレイヤー描画
 	int Move = 0;
 
+	//空中移動
+	if (!Ground) 
+	{
+		Move = abs(-2 + (JumpCount / 3 % 4));
+		if (JumpCount == 0)Move += Anim / 25 % 3;
+
+		//ゲーム画面分の間隔をあけて3体描画する
+		DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[16 + Move], true, Turn);
+		DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[16 + Move], true, Turn);
+		DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[16 + Move], true, Turn);
+	}
 	//待機
-	if (Speed == 0)
+	else if (Speed == 0)
 	{
 		Move = GameTime / 25 % 3;
+		//ゲーム画面分の間隔をあけて3体描画する
 		DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[Move], true, Turn);
+		DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[Move], true, Turn);
+		DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[Move], true, Turn);
 		
 	}
 	//地面を走る
@@ -179,13 +218,23 @@ void Player::Draw() const {
 	{
 		Move = Anim / 5 % 3;
 		if ((PadX > -0.3 && 0.3 > PadX) ||
-			 (Speed < 0 && PadX >= 0.3) ||
-			 (0 < Speed && -0.3 >= PadX)) DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[11], true, Turn);
-		else DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[8 + Move], true, Turn);
+			(Speed < 0 && PadX >= 0.3) ||
+			(0 < Speed && -0.3 >= PadX)) {
+			//ゲーム画面分の間隔をあけて3体描画する
+			DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[11], true, Turn);
+			DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[11], true, Turn);
+			DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[11], true, Turn);
+		}
+		else
+		{
+			DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[8 + Move], true, Turn);
+			DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[8 + Move], true, Turn);
+			DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[8 + Move], true, Turn);
+		}
 	}
 
-	DrawCircle(LeftX + SIDE_MARGIN, Y, 2, 0x00ff00, true);
-	DrawCircle(RightX + SIDE_MARGIN, Y, 2, 0x00ff00, true);
+	//DrawCircle(LeftX + SIDE_MARGIN, Y, 2, 0x00ff00, true);
+	//DrawCircle(RightX + SIDE_MARGIN, Y, 2, 0x00ff00, true);
 }
 
 void Player::InitPad() {

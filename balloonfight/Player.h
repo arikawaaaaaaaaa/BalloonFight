@@ -11,7 +11,7 @@ private:
 
 	//プレイヤーサイズ
 	float Width = 19 / 2;
-	float Height = 25 / 2;
+	float Height = 45 / 2;
 
 	float Speed;	//移動速度
 	bool Turn = true;		//左右反転
