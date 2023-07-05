@@ -10,7 +10,7 @@ private:
 	Player player;
 	int Level;	//ステージ数
 
-	int Ground[7];	//足場
+	int Ground[10];	//足場
 
 public:
 	GameMainScene();
