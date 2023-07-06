@@ -6,7 +6,7 @@
 
 Player::Player() {
 	X = BLOCK_SIZE * 5 + Width;
-	Y = BLOCK_SIZE * 20 - Height;
+	Y = BLOCK_SIZE * 20;
 
 	LeftX = X - Width;
 	RightX = X + Width;
@@ -24,6 +24,66 @@ void Player::Update() {
 	InitPad();
 	int BlockSize = BLOCK_SIZE;
 
+	//上下移動-----------------------------------------------------------
+	float JumpPow = -0.1;	//ジャンプ力
+	float FallMax = -JumpPow * 21;		//落下の最大速度
+
+	if (!JumpCount && (PAD_INPUT::OnButton(XINPUT_BUTTON_B) || PAD_INPUT::OnPressed(XINPUT_BUTTON_A)))
+	{
+		JumpCount = 12;
+		Anim = 0;
+		//if (Ground)fall = JumpPow * 12;
+		if (PadX >= 0.3 || PadX <= -0.3)AirMove = 12;
+	}
+
+	if (JumpCount)
+	{
+		fall += JumpPow;
+		if (fall < JumpPow * 25) fall = JumpPow * 25;
+	}
+	else
+	{
+		fall += 0.1;
+		Anim++;
+		if (FallMax < fall)fall = FallMax;
+	}
+	Y += fall;
+
+	if (--JumpCount < 0)JumpCount = 0;
+
+	bool WallHit = false;
+	//天井でジャンプが阻まれる
+	while (MapData[(int)(Y - Height) / BlockSize][(int)LeftX / BlockSize] > 0 ||
+		MapData[(int)(Y - Height) / BlockSize][(int)X / BlockSize] > 0 ||
+		MapData[(int)(Y - Height) / BlockSize][(int)RightX / BlockSize] > 0 ||
+		Y - Height <= 0)
+	{
+		Y += 0.1;
+		WallHit = true;
+	}
+
+	if (WallHit)
+	{
+		fall *= -1;
+	}
+
+	Ground = false;
+
+	//床で落下が阻まれる
+	while (MapData[(int)(Y + Height) / BlockSize][(int)LeftX / BlockSize] > 0 ||
+		MapData[(int)(Y + Height) / BlockSize][(int)X / BlockSize] > 0 ||
+		MapData[(int)(Y + Height) / BlockSize][(int)RightX / BlockSize] > 0 ||
+		SCREEN_HEIGHT + BLOCK_SIZE * 2 <= Y + Height + 1)
+	{
+		Y -= 0.1;
+		Ground = true;
+		if (fall > 0.f)
+		{
+			fall = 0;
+		}
+	}
+
+	//左右移動-------------------------------------------
 	float MaxSpeed = 2.3;
 
 	if (Ground || AirMove)
@@ -64,7 +124,7 @@ void Player::Update() {
 	X += Speed;
 	FixX();
 
-	bool WallHit = false;
+	WallHit = false;
 	//壁で移動を止める
 	bool Wall = false;
 	for (float i = 0; i < Height && !Wall; i++)
@@ -108,64 +168,6 @@ void Player::Update() {
 
 	if (WallHit)Speed *= -0.9;
 
-	float JumpPow = -0.1;	//ジャンプ力
-	float FallMax = -JumpPow * 21;		//落下の最大速度
-
-	if (!JumpCount && (PAD_INPUT::OnButton(XINPUT_BUTTON_B) || PAD_INPUT::OnPressed(XINPUT_BUTTON_A)))
-	{
-		JumpCount = 12;
-		Anim = 0;
-		//if (Ground)fall = JumpPow * 12;
-		if (PadX >= 0.3 || PadX <= -0.3)AirMove = 12;
-	}
-
-	if (JumpCount) 
-	{
-		fall += JumpPow;
-		if (fall < JumpPow * 25) fall = JumpPow * 25;
-	}
-	else 
-	{
-		fall += 0.1;
-		Anim++;
-		if (FallMax < fall)fall = FallMax;
-	}
-	Y += fall;
-
-	if (--JumpCount < 0)JumpCount = 0;
-
-	WallHit = false;
-	//天井でジャンプが阻まれる
-	while (MapData[(int)(Y - Height) / BlockSize][(int)LeftX / BlockSize] > 0 ||
-		   MapData[(int)(Y - Height) / BlockSize][(int)X / BlockSize] > 0 ||
-		   MapData[(int)(Y - Height) / BlockSize][(int)RightX / BlockSize] > 0 ||
-		   Y - Height <= 0)
-	{
-		Y += 0.1;
-		WallHit = true;
-	}
-
-	if (WallHit)
-	{
-		fall *= -1;
-	}
-
-	Ground = false;
-
-	//床で落下が阻まれる
-	while (MapData[(int)(Y + Height) / BlockSize][(int)LeftX / BlockSize] > 0 ||
-		MapData[(int)(Y + Height) / BlockSize][(int)X / BlockSize] > 0 ||
-		MapData[(int)(Y + Height) / BlockSize][(int)RightX / BlockSize] > 0 ||
-		SCREEN_HEIGHT + BLOCK_SIZE * 2 <= Y + Height + 1)
-	{
-		Y -= 0.1;
-		Ground = true;
-		if (fall > 0.f)
-		{
-			fall = 0;
-		}
-	}
-
 	GameTime++;
 }
 
@@ -183,6 +185,21 @@ void Player::FixX()
 	RightX = X + Width;
 	if (GAME_WIDTH <= RightX)RightX = RightX - GAME_WIDTH;
 }
+
+void Player::Reset()
+{
+	X = BLOCK_SIZE * 5 + Width;
+	Y = BLOCK_SIZE * 20;
+
+	LeftX = X - Width;
+	RightX = X + Width;
+
+	Speed = 0;
+	fall = 1;
+
+	JumpCount = 0;
+}
+
 
 void Player::Draw() const {
 	//DrawBox(SIDE_MARGIN + X - Width, Y - Height, SIDE_MARGIN + X + Width, Y + Height, 0xff0000, true);

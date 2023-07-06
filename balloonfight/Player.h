@@ -40,5 +40,7 @@ public:
 	void SetMapData(int MapData[MAP_HEIGHT][MAP_WIDTH]);
 
 	void FixX();	//画面端のワープと左右端の座標の更新
+
+	void Reset();	//位置リセット
 };
 

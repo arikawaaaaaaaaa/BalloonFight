@@ -164,7 +164,7 @@ int Stage[5][MAP_HEIGHT][MAP_WIDTH] =
 
 GameMainScene::GameMainScene()
 {
-	Level = 4;
+	Level = 0;
 	player.SetMapData(Stage[Level]);
 
 	//地面
@@ -195,12 +195,21 @@ AbstractScene* GameMainScene::Update()
 {
 	player.Update();
 
+	if (PAD_INPUT::OnButton(XINPUT_BUTTON_START))
+	{
+		if (++Level > 4)Level = 0;
+		player.SetMapData(Stage[Level]);
+		player.Reset();
+	}
+
 	return this;
 }
 
 void GameMainScene::Draw() const
 {
-	DrawString(100, 100, "MAIN", 0xffffff);
+	DrawFormatString(100, 50, 0xffffff, "STAGE %d", Level + 1);
+	DrawFormatString(100, 100, 0xffffff, "PRESS START");
+
 	//for (int i = 0; i <= MAP_WIDTH; i++)
 	//{
 	//	DrawLine(SIDE_MARGIN + BLOCK_SIZE * i, 0, SIDE_MARGIN + BLOCK_SIZE * i, SCREEN_HEIGHT, 0xffffff);
@@ -210,22 +219,6 @@ void GameMainScene::Draw() const
 	//{
 	//	DrawLine(0, BLOCK_SIZE * i, SCREEN_WIDTH, BLOCK_SIZE * i, 0xffffff);
 	//}
-
-	//for (int i = 0; i < MAP_HEIGHT - 6; i++)
-	//{
-	//	for (int j = 0; j < MAP_WIDTH; j++)
-	//	{
-	//		if (Stage[Level][i][j] == 1)
-	//		{
-	//			DrawBox(SIDE_MARGIN + BLOCK_SIZE * j, BLOCK_SIZE * i, SIDE_MARGIN + BLOCK_SIZE * (j + 1), BLOCK_SIZE * (i + 1), 0x0ed145, true);
-	//		}
-	//		else if (Stage[Level][i][j] == 2)
-	//		{
-	//			DrawBox(SIDE_MARGIN + BLOCK_SIZE * j, BLOCK_SIZE * i, SIDE_MARGIN + BLOCK_SIZE * (j + 1), BLOCK_SIZE * (i + 1), 0x88001b, true);
-	//		}
-	//	}
-	//}
-
 
 	player.Draw();
 
