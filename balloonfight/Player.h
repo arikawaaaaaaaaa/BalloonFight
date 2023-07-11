@@ -10,7 +10,7 @@ private:
 	float LeftX, RightX;	//プレイヤーの左右端座標
 
 	//プレイヤーサイズ
-	float Width = 19 / 2;
+	float Width = 30 / 2;
 	float Height = 45 / 2;
 
 	float Speed;	//移動速度
