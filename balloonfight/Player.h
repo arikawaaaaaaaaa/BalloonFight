@@ -42,5 +42,7 @@ public:
 	void FixX();	//画面端のワープと左右端の座標の更新
 
 	void Reset();	//位置リセット
-};
 
+	float GetX() { return X; }	//X座標取得
+	float GetY() { return Y; }	//Y座標取得
+};

@@ -21,3 +21,6 @@
 
 //ブロック1つのサイズ(正方形)
 #define BLOCK_SIZE GAME_WIDTH / MAP_WIDTH
+
+//敵の最大数
+#define ENEMY_MAX 5

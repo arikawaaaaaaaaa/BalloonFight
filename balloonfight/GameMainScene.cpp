@@ -167,6 +167,15 @@ GameMainScene::GameMainScene()
 	Level = 0;
 	player.SetMapData(Stage[Level]);
 
+	enemy = new Enemy * [ENEMY_MAX];
+
+	for (int i = 0; i < ENEMY_MAX; i++)
+	{
+		enemy[i] = nullptr;
+	}
+	enemy[0] = new Enemy(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+	enemy[0]->SetMapData(Stage[Level]);
+
 	//地面
 	Ground[0] = LoadGraph("images/GroundA.png");
 	Ground[1] = LoadGraph("images/GroundB.png");
@@ -193,7 +202,20 @@ GameMainScene::GameMainScene()
 
 AbstractScene* GameMainScene::Update() 
 {
+	//プレイヤー更新
 	player.Update();
+
+	//敵更新
+	for (int i = 0; i < ENEMY_MAX; i++)
+	{
+		if (enemy[i] != nullptr) 
+		{
+			enemy[i]->Update(player.GetX(), player.GetY());
+		}
+	}
+
+#ifdef DEBUG
+
 
 	if (PAD_INPUT::OnButton(XINPUT_BUTTON_START))
 	{
@@ -202,13 +224,16 @@ AbstractScene* GameMainScene::Update()
 		player.Reset();
 	}
 
+#endif // DEBUG
 	return this;
 }
 
 void GameMainScene::Draw() const
 {
+#ifdef DEBUG
 	DrawFormatString(100, 50, 0xffffff, "STAGE %d", Level + 1);
 	DrawFormatString(100, 100, 0xffffff, "PRESS START");
+#endif // DEBUG
 
 	//for (int i = 0; i <= MAP_WIDTH; i++)
 	//{
@@ -221,6 +246,15 @@ void GameMainScene::Draw() const
 	//}
 
 	player.Draw();
+
+	//敵更新
+	for (int i = 0; i < ENEMY_MAX; i++)
+	{
+		if (enemy[i] != nullptr)
+		{
+			enemy[i]->Draw();
+		}
+	}
 
 	//足場を描画
 	if (Level + 1 <= 3) DrawGraph(SIDE_MARGIN, SCREEN_HEIGHT - 80, Ground[0], true);
@@ -317,6 +351,7 @@ void GameMainScene::Draw() const
 		}
 	}
 
+	//画面端の空間
 	DrawBox(0, 0, SIDE_MARGIN, SCREEN_HEIGHT, 0x000000, true);
 	DrawBox(SCREEN_WIDTH - SIDE_MARGIN, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0x000000, true);
 }
