@@ -222,6 +222,13 @@ AbstractScene* GameMainScene::Update()
 		if (++Level > 4)Level = 0;
 		player.SetMapData(Stage[Level]);
 		player.Reset();
+
+		for (int i = 0; i < ENEMY_MAX; i++)
+		{
+			enemy[i] = nullptr;
+		}
+		enemy[0] = new Enemy(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+		enemy[0]->SetMapData(Stage[Level]);
 	}
 
 #endif // DEBUG

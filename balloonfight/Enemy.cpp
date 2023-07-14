@@ -24,7 +24,7 @@ void Enemy::Update(float Px, float Py) {
 	int BlockSize = BLOCK_SIZE;
 
 	//上下移動-----------------------------------------------------------
-	float JumpPow = -0.1;	//ジャンプ力
+	float JumpPow = -0.05;	//ジャンプ力
 	float FallMax = -JumpPow * 21;		//落下の最大速度
 
 	if (!JumpCount && Py < Y)
@@ -32,7 +32,6 @@ void Enemy::Update(float Px, float Py) {
 		JumpCount = 12;
 		Anim = 0;
 		//if (Ground)fall = JumpPow * 12;
-		AirMove = 12;
 	}
 
 	if (JumpCount)
@@ -42,7 +41,7 @@ void Enemy::Update(float Px, float Py) {
 	}
 	else
 	{
-		fall += 0.1;
+		fall += -JumpPow;
 		Anim++;
 		if (FallMax < fall)fall = FallMax;
 	}
@@ -79,18 +78,19 @@ void Enemy::Update(float Px, float Py) {
 		{
 			fall = 0;
 		}
+		JumpCount = 12;
 	}
 
 	//左右移動-------------------------------------------
-	float MaxSpeed = 2;
+	float MaxSpeed = 1;
 
-	if (Ground || AirMove)
+	if (Ground || JumpCount)
 	{
 		//右に移動
 		if (Px >= X) {
 			if (Speed < 0 && Ground)Speed += 0.2;
 			Turn = true;
-			Speed += 0.2;
+			Speed += 0.05;
 			Anim++;
 			if (MaxSpeed < Speed)Speed = MaxSpeed;
 		}
@@ -98,7 +98,7 @@ void Enemy::Update(float Px, float Py) {
 		else if (Px <= X) {
 			if (0 < Speed && Ground)Speed -= 0.2;
 			Turn = false;
-			Speed -= 0.2;
+			Speed -= 0.05;
 			Anim++;
 			if (Speed < -MaxSpeed)Speed = -MaxSpeed;
 		}
@@ -106,19 +106,17 @@ void Enemy::Update(float Px, float Py) {
 		{
 			if (0 < Speed)
 			{
-				Speed -= 0.2;
+				Speed -= 0.1;
 				if (Speed < 0)Speed = 0;
 			}
 			else if (Speed < 0)
 			{
-				Speed += 0.2;
+				Speed += 0.1;
 				if (0 < Speed)Speed = 0;
 			}
 			Anim = 0;
 		}
 	}
-
-	if (--AirMove < 0)AirMove = 0;
 
 	//敵キャラ横移動
 	X += Speed;
