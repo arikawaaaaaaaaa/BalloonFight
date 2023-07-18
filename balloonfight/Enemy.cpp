@@ -24,10 +24,19 @@ void Enemy::Update(float Px, float Py) {
 	int BlockSize = BLOCK_SIZE;
 
 	//上下移動-----------------------------------------------------------
-	float JumpPow = -0.05;	//ジャンプ力
-	float FallMax = -JumpPow * 21;		//落下の最大速度
+	float JumpPow = -0.02;	//ジャンプ力
+	float FallMax = 0.5;		//落下の最大速度
 
-	if (!JumpCount && Py < Y)
+	if (!Flying && Py < Y)
+	{
+		Flying = true;
+	}
+	else if (Flying && 100 < Py - Y)
+	{
+		Flying = false;
+	}
+
+	if (!JumpCount && Flying)
 	{
 		JumpCount = 12;
 		Anim = 0;
@@ -37,13 +46,13 @@ void Enemy::Update(float Px, float Py) {
 	if (JumpCount)
 	{
 		fall += JumpPow;
-		if (fall < JumpPow * 25) fall = JumpPow * 25;
+		if (fall < -FallMax) fall = -FallMax;
 	}
 	else
 	{
 		fall += -JumpPow;
 		Anim++;
-		if (FallMax < fall)fall = FallMax;
+		if (FallMax * 1.5 < fall)fall = FallMax * 1.5;
 	}
 	Y += fall;
 

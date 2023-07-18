@@ -21,6 +21,8 @@ private:
 	int JumpCount;	//ジャンプ入力間隔
 	bool Ground = true;	//地面にいるか？
 
+	bool Flying = false;	//飛行するか？
+
 	float PadX;	//横方向入力値
 
 	int Image[30];	//画像
