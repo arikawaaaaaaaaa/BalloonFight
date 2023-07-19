@@ -30,6 +30,7 @@ void Enemy::Update(float Px, float Py) {
 	if (!Flying && Py < Y)
 	{
 		Flying = true;
+		if (Jumptime == 0)Jumptime = GetRand(120) + 600;
 	}
 	else if (Flying && 100 < Py - Y)
 	{
@@ -89,6 +90,8 @@ void Enemy::Update(float Px, float Py) {
 		}
 		JumpCount = 12;
 	}
+
+	if (--Jumptime < 0)Jumptime = 0;
 
 	//¶‰EˆÚ“®-------------------------------------------
 	float MaxSpeed = 1;

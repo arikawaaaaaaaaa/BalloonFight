@@ -22,6 +22,8 @@ private:
 	bool Ground = true;	//地面にいるか？
 
 	bool Flying = false;	//飛行するか？
+	int Jumptime = 0;	//連続飛行する時間
+	int JumpCool = 0;	//飛行の間隔
 
 	float PadX;	//横方向入力値
 
