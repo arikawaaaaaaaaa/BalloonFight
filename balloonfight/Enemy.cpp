@@ -71,7 +71,7 @@ void Enemy::Update(float Px, float Py) {
 
 	if (WallHit)
 	{
-		fall *= -1;
+		fall *= -2;
 	}
 
 	Ground = false;
