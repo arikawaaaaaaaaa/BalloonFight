@@ -22,12 +22,12 @@ private:
 	bool Ground = true;	//地面にいるか？
 
 	bool Flying = false;	//飛行するか？
-	int Jumptime = 0;	//連続飛行する時間
-	int JumpCool = 0;	//飛行の間隔
+	int SlideTime = 0;		//横移動する時間
+	float MovePower = 0;	//キャラ移動の加速度
 
 	float PadX;	//横方向入力値
 
-	int Image[30];	//画像
+	int Image[18];	//画像
 	int Anim = 0;	//アニメーション管理
 
 	int GameTime = 0;	//経過時間

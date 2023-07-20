@@ -16,7 +16,7 @@ Enemy::Enemy(float X, float Y) {
 
 	JumpCount = 0;
 
-	LoadDivGraph("images/player.png", 30, 8, 4, 64, 64, Image);
+	LoadDivGraph("images/EnemyA.png", 18, 6, 3, 64, 64, Image);
 }
 
 void Enemy::Update(float Px, float Py) {
@@ -30,7 +30,6 @@ void Enemy::Update(float Px, float Py) {
 	if (!Flying && Py < Y)
 	{
 		Flying = true;
-		if (Jumptime == 0)Jumptime = GetRand(120) + 600;
 	}
 	else if (Flying && 100 < Py - Y)
 	{
@@ -39,7 +38,7 @@ void Enemy::Update(float Px, float Py) {
 
 	if (!JumpCount && Flying)
 	{
-		JumpCount = 12;
+		JumpCount = 60;
 		Anim = 0;
 		//if (Ground)fall = JumpPow * 12;
 	}
@@ -47,17 +46,15 @@ void Enemy::Update(float Px, float Py) {
 	if (JumpCount)
 	{
 		fall += JumpPow;
+		Anim++;
 		if (fall < -FallMax) fall = -FallMax;
 	}
 	else
 	{
 		fall += -JumpPow;
-		Anim++;
 		if (FallMax * 1.5 < fall)fall = FallMax * 1.5;
 	}
 	Y += fall;
-
-	if (--JumpCount < 0)JumpCount = 0;
 
 	bool WallHit = false;
 	//天井でジャンプが阻まれる
@@ -91,43 +88,64 @@ void Enemy::Update(float Px, float Py) {
 		JumpCount = 12;
 	}
 
-	if (--Jumptime < 0)Jumptime = 0;
-
 	//左右移動-------------------------------------------
 	float MaxSpeed = 1;
 
-	if (Ground || JumpCount)
+	//プレイヤーの真下にいるか調べる
+	bool under = false;
+	if (fabs(Px - X) < 30 && Y - Py < 100 && 0 < Y - Py)under = true;
+
+	//移動する方向と時間を決める
+
+	if (Flying && SlideTime == 0)
 	{
-		//右に移動
-		if (Px >= X) {
-			if (Speed < 0 && Ground)Speed += 0.2;
-			Turn = true;
-			Speed += 0.05;
-			Anim++;
-			if (MaxSpeed < Speed)Speed = MaxSpeed;
-		}
-		//左に移動
-		else if (Px <= X) {
-			if (0 < Speed && Ground)Speed -= 0.2;
-			Turn = false;
-			Speed -= 0.05;
-			Anim++;
-			if (Speed < -MaxSpeed)Speed = -MaxSpeed;
-		}
-		else if (Ground)
+		SlideTime = GetRand(30) + 60;
+		if (Px >= X)
 		{
-			if (0 < Speed)
+			//プレイヤーの真下にいなければ右に加速 そうでなければ左に加速
+			if (!under)
 			{
-				Speed -= 0.1;
-				if (Speed < 0)Speed = 0;
+				MovePower = 0.05;
+				Turn = true;
 			}
-			else if (Speed < 0)
+			else
 			{
-				Speed += 0.1;
-				if (0 < Speed)Speed = 0;
+				MovePower = -0.05;
+				Turn = false;
 			}
-			Anim = 0;
 		}
+		else if (Px <= X) {
+			Turn = false;
+
+			//プレイヤーの真下にいなければ左に加速 そうでなければ右に加速
+			if (!under)
+			{
+				MovePower = -0.05;
+				Turn = false;
+			}
+			else
+			{
+				MovePower = 0.05;
+				Turn = true;
+			}
+		}
+	}
+
+	if (SlideTime)
+	{
+		Speed += MovePower;
+
+		Anim++;
+		if (MaxSpeed < Speed)Speed = MaxSpeed;
+		if (Speed < -MaxSpeed)Speed = -MaxSpeed;
+	}
+
+	if (--JumpCount < 0)JumpCount = 0;
+
+	if (--SlideTime < 0)
+	{
+		MovePower = 0;
+		SlideTime = 0;
 	}
 
 	//敵キャラ横移動
@@ -226,9 +244,9 @@ void Enemy::Draw() const {
 		if (JumpCount == 0)Move += Anim / 25 % 3;
 
 		//ゲーム画面分の間隔をあけて3体描画する
-		DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[16 + Move], true, Turn);
-		DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[16 + Move], true, Turn);
-		DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[16 + Move], true, Turn);
+		DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[8 + Move], true, Turn);
+		DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[8 + Move], true, Turn);
+		DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[8 + Move], true, Turn);
 	}
 	//待機
 	else if (Speed == 0)
@@ -240,25 +258,25 @@ void Enemy::Draw() const {
 		DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[Move], true, Turn);
 
 	}
-	//地面を走る
-	else if (Ground)
-	{
-		Move = Anim / 5 % 3;
-		if ((PadX > -0.3 && 0.3 > PadX) ||
-			(Speed < 0 && PadX >= 0.3) ||
-			(0 < Speed && -0.3 >= PadX)) {
-			//ゲーム画面分の間隔をあけて3体描画する
-			DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[11], true, Turn);
-			DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[11], true, Turn);
-			DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[11], true, Turn);
-		}
-		else
-		{
-			DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[8 + Move], true, Turn);
-			DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[8 + Move], true, Turn);
-			DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[8 + Move], true, Turn);
-		}
-	}
+	////地面を走る
+	//else if (Ground)
+	//{
+	//	Move = Anim / 5 % 3;
+	//	if ((PadX > -0.3 && 0.3 > PadX) ||
+	//		(Speed < 0 && PadX >= 0.3) ||
+	//		(0 < Speed && -0.3 >= PadX)) {
+	//		//ゲーム画面分の間隔をあけて3体描画する
+	//		DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[11], true, Turn);
+	//		DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[11], true, Turn);
+	//		DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[11], true, Turn);
+	//	}
+	//	else
+	//	{
+	//		DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[8 + Move], true, Turn);
+	//		DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[8 + Move], true, Turn);
+	//		DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[8 + Move], true, Turn);
+	//	}
+	//}
 
 	//DrawCircle(LeftX + SIDE_MARGIN, Y, 2, 0x00ff00, true);
 	//DrawCircle(RightX + SIDE_MARGIN, Y, 2, 0x00ff00, true);
