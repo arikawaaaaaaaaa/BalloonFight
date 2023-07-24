@@ -1,4 +1,4 @@
-#include "Enemy.h"
+ï»¿#include "Enemy.h"
 #include"DxLib.h"
 #include"PadInput.h"
 #include"common.h"
@@ -23,168 +23,157 @@ void Enemy::Update(float Px, float Py) {
 
 	int BlockSize = BLOCK_SIZE;
 
-	//ã‰ºˆÚ“®-----------------------------------------------------------
-	float JumpPow = -0.02;	//ƒWƒƒƒ“ƒv—Í
-	float FallMax = 0.5;		//—‰º‚ÌÅ‘å‘¬“x
+	if (Condition == 1)
+	{
+		//ä¸Šä¸‹ç§»å‹•-----------------------------------------------------------
+		float JumpPow = -0.02;	//ã‚¸ãƒ£ãƒ³ãƒ—åŠ›
+		float FallMax = 0.5;		//è½ä¸‹ã®æœ€å¤§é€Ÿåº¦
 
-	if (!Flying && Py < Y)
-	{
-		Flying = true;
-	}
-	else if (Flying && 100 < Py - Y)
-	{
-		Flying = false;
-	}
-
-	if (!JumpCount && Flying)
-	{
-		JumpCount = 60;
-		Anim = 0;
-		//if (Ground)fall = JumpPow * 12;
-	}
-
-	if (JumpCount)
-	{
-		fall += JumpPow;
-		Anim++;
-		if (fall < -FallMax) fall = -FallMax;
-	}
-	else
-	{
-		fall += -JumpPow;
-		if (FallMax * 1.5 < fall)fall = FallMax * 1.5;
-	}
-	Y += fall;
-
-	bool WallHit = false;
-	//“Vˆä‚ÅƒWƒƒƒ“ƒv‚ª‘j‚Ü‚ê‚é
-	while (MapData[(int)(Y - Height) / BlockSize][(int)LeftX / BlockSize] > 0 ||
-		MapData[(int)(Y - Height) / BlockSize][(int)X / BlockSize] > 0 ||
-		MapData[(int)(Y - Height) / BlockSize][(int)RightX / BlockSize] > 0 ||
-		Y - Height <= 0)
-	{
-		Y += 0.1;
-		WallHit = true;
-	}
-
-	if (WallHit)
-	{
-		fall *= -2;
-	}
-
-	Ground = false;
-
-	//°‚Å—‰º‚ª‘j‚Ü‚ê‚é
-	while (MapData[(int)(Y + Height) / BlockSize][(int)LeftX / BlockSize] > 0 ||
-		MapData[(int)(Y + Height) / BlockSize][(int)X / BlockSize] > 0 ||
-		MapData[(int)(Y + Height) / BlockSize][(int)RightX / BlockSize] > 0 ||
-		SCREEN_HEIGHT + BLOCK_SIZE * 2 <= Y + Height + 1)
-	{
-		Y -= 0.1;
-		if (fall > 0.f)
+		if (!Flying && Py < Y)
 		{
-			fall = 0;
+			Flying = true;
 		}
-		JumpCount = 12;
-	}
-
-	//¶‰EˆÚ“®-------------------------------------------
-	float MaxSpeed = 1;
-
-	//ƒvƒŒƒCƒ„[‚Ì^‰º‚É‚¢‚é‚©’²‚×‚é
-	bool under = false;
-	if (fabs(Px - X) < 30 && Y - Py < 100 && 0 < Y - Py)under = true;
-
-	//ˆÚ“®‚·‚é•ûŒü‚ÆŠÔ‚ğŒˆ‚ß‚é
-
-	if (Flying && SlideTime == 0)
-	{
-		SlideTime = GetRand(30) + 60;
-		if (Px >= X)
+		else if (Flying && 100 < Py - Y)
 		{
-			//ƒvƒŒƒCƒ„[‚Ì^‰º‚É‚¢‚È‚¯‚ê‚Î‰E‚É‰Á‘¬ ‚»‚¤‚Å‚È‚¯‚ê‚Î¶‚É‰Á‘¬
-			if (!under)
+			Flying = false;
+		}
+
+		if (!JumpCount && Flying)
+		{
+			JumpCount = 60;
+			Anim = 0;
+			//if (Ground)fall = JumpPow * 12;
+		}
+
+		if (JumpCount)
+		{
+			fall += JumpPow;
+			Anim++;
+			if (fall < -FallMax) fall = -FallMax;
+		}
+		else
+		{
+			fall += -JumpPow;
+			if (FallMax * 1.5 < fall)fall = FallMax * 1.5;
+		}
+		Y += fall;
+
+		bool WallHit = false;
+		//å¤©äº•ã§ã‚¸ãƒ£ãƒ³ãƒ—ãŒé˜»ã¾ã‚Œã‚‹
+		while (MapData[(int)(Y - Height) / BlockSize][(int)LeftX / BlockSize] > 0 ||
+			MapData[(int)(Y - Height) / BlockSize][(int)X / BlockSize] > 0 ||
+			MapData[(int)(Y - Height) / BlockSize][(int)RightX / BlockSize] > 0 ||
+			Y - Height <= 0)
+		{
+			Y += 0.1;
+			WallHit = true;
+		}
+
+		if (WallHit)
+		{
+			fall *= -2;
+		}
+
+		//åºŠã§è½ä¸‹ãŒé˜»ã¾ã‚Œã‚‹
+		while (MapData[(int)(Y + Height) / BlockSize][(int)LeftX / BlockSize] > 0 ||
+			MapData[(int)(Y + Height) / BlockSize][(int)X / BlockSize] > 0 ||
+			MapData[(int)(Y + Height) / BlockSize][(int)RightX / BlockSize] > 0 ||
+			SCREEN_HEIGHT + BLOCK_SIZE * 2 <= Y + Height + 1)
+		{
+			Y -= 0.1;
+			if (fall > 0.f)
 			{
-				MovePower = 0.05;
-				Turn = true;
+				fall = 0;
 			}
-			else
+			JumpCount = 60;
+			SlideTime = 120;
+		}
+
+		//å·¦å³ç§»å‹•-------------------------------------------
+		float MaxSpeed = 1;
+
+		//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®çœŸä¸‹ã«ã„ã‚‹ã‹èª¿ã¹ã‚‹
+		bool under = false;
+		if (fabs(Px - X) < 30 && Y - Py < 100 && 0 < Y - Py)under = true;
+
+		//ç§»å‹•ã™ã‚‹æ–¹å‘ã¨æ™‚é–“ã‚’æ±ºã‚ã‚‹
+
+		if (Flying && SlideTime == 0)
+		{
+			SlideTime = GetRand(30) + 60;
+			if (Px >= X)
 			{
-				MovePower = -0.05;
+				//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®çœŸä¸‹ã«ã„ãªã‘ã‚Œã°å³ã«åŠ é€Ÿ ãã†ã§ãªã‘ã‚Œã°å·¦ã«åŠ é€Ÿ
+				if (!under)
+				{
+					MovePower = 0.05;
+					Turn = true;
+				}
+				else
+				{
+					MovePower = -0.05;
+					Turn = false;
+				}
+			}
+			else if (Px <= X) {
 				Turn = false;
+
+				//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®çœŸä¸‹ã«ã„ãªã‘ã‚Œã°å·¦ã«åŠ é€Ÿ ãã†ã§ãªã‘ã‚Œã°å³ã«åŠ é€Ÿ
+				if (!under)
+				{
+					MovePower = -0.05;
+					Turn = false;
+				}
+				else
+				{
+					MovePower = 0.05;
+					Turn = true;
+				}
 			}
 		}
-		else if (Px <= X) {
-			Turn = false;
 
-			//ƒvƒŒƒCƒ„[‚Ì^‰º‚É‚¢‚È‚¯‚ê‚Î¶‚É‰Á‘¬ ‚»‚¤‚Å‚È‚¯‚ê‚Î‰E‚É‰Á‘¬
-			if (!under)
-			{
-				MovePower = -0.05;
-				Turn = false;
-			}
-			else
-			{
-				MovePower = 0.05;
-				Turn = true;
-			}
+		if (SlideTime)
+		{
+			Speed += MovePower;
+
+			Anim++;
+			if (MaxSpeed < Speed)Speed = MaxSpeed;
+			if (Speed < -MaxSpeed)Speed = -MaxSpeed;
 		}
-	}
 
-	if (SlideTime)
-	{
-		Speed += MovePower;
+		if (--JumpCount < 0)JumpCount = 0;
 
-		Anim++;
-		if (MaxSpeed < Speed)Speed = MaxSpeed;
-		if (Speed < -MaxSpeed)Speed = -MaxSpeed;
-	}
+		if (--SlideTime < 0)
+		{
+			MovePower = 0;
+			SlideTime = 0;
+		}
 
-	if (--JumpCount < 0)JumpCount = 0;
-
-	if (--SlideTime < 0)
-	{
-		MovePower = 0;
-		SlideTime = 0;
-	}
-
-	//“GƒLƒƒƒ‰‰¡ˆÚ“®
-	X += Speed;
-	FixX();
-
-	WallHit = false;
-	//•Ç‚ÅˆÚ“®‚ğ~‚ß‚é
-	bool Wall = false;
-	for (float i = 0; i < Height && !Wall; i++)
-	{
-		if (MapData[(int)(Y + i) / BlockSize][(int)RightX / BlockSize] > 0) Wall = true;
-		if (MapData[(int)(Y - i) / BlockSize][(int)RightX / BlockSize] > 0) Wall = true;
-	}
-	while (Wall)
-	{
-		X--;
+		//æ•µã‚­ãƒ£ãƒ©æ¨ªç§»å‹•
+		X += Speed;
 		FixX();
-		WallHit = true;
 
-		Wall = false;
+		WallHit = false;
+		//å£ã§ç§»å‹•ã‚’æ­¢ã‚ã‚‹
+		bool Wall = false;
 		for (float i = 0; i < Height && !Wall; i++)
 		{
 			if (MapData[(int)(Y + i) / BlockSize][(int)RightX / BlockSize] > 0) Wall = true;
 			if (MapData[(int)(Y - i) / BlockSize][(int)RightX / BlockSize] > 0) Wall = true;
 		}
-	}
+		while (Wall)
+		{
+			X--;
+			FixX();
+			WallHit = true;
 
-	Wall = false;
-	for (float i = 0; i < Height && !Wall; i++)
-	{
-		if (MapData[(int)(Y + i) / BlockSize][(int)LeftX / BlockSize] > 0) Wall = true;
-		if (MapData[(int)(Y - i) / BlockSize][(int)LeftX / BlockSize] > 0) Wall = true;
-	}
-	while (Wall)
-	{
-		X++;
-		FixX();
-		WallHit = true;
+			Wall = false;
+			for (float i = 0; i < Height && !Wall; i++)
+			{
+				if (MapData[(int)(Y + i) / BlockSize][(int)RightX / BlockSize] > 0) Wall = true;
+				if (MapData[(int)(Y - i) / BlockSize][(int)RightX / BlockSize] > 0) Wall = true;
+			}
+		}
 
 		Wall = false;
 		for (float i = 0; i < Height && !Wall; i++)
@@ -192,24 +181,58 @@ void Enemy::Update(float Px, float Py) {
 			if (MapData[(int)(Y + i) / BlockSize][(int)LeftX / BlockSize] > 0) Wall = true;
 			if (MapData[(int)(Y - i) / BlockSize][(int)LeftX / BlockSize] > 0) Wall = true;
 		}
-	}
+		while (Wall)
+		{
+			X++;
+			FixX();
+			WallHit = true;
 
-	if (WallHit)Speed *= -0.9;
+			Wall = false;
+			for (float i = 0; i < Height && !Wall; i++)
+			{
+				if (MapData[(int)(Y + i) / BlockSize][(int)LeftX / BlockSize] > 0) Wall = true;
+				if (MapData[(int)(Y - i) / BlockSize][(int)LeftX / BlockSize] > 0) Wall = true;
+			}
+		}
+
+		if (WallHit)Speed *= -0.9;
+	}
+	else if (Condition == 0)
+	{
+		if (240 < ++Takeoff)Condition = 1;
+
+		Y += 5;
+
+		//åºŠã§è½ä¸‹ãŒé˜»ã¾ã‚Œã‚‹
+		while (MapData[(int)(Y + Height) / BlockSize][(int)LeftX / BlockSize] > 0 ||
+			MapData[(int)(Y + Height) / BlockSize][(int)X / BlockSize] > 0 ||
+			MapData[(int)(Y + Height) / BlockSize][(int)RightX / BlockSize] > 0 ||
+			SCREEN_HEIGHT + BLOCK_SIZE * 2 <= Y + Height + 1)
+		{
+			Y -= 0.1;
+			if (fall > 0.f)
+			{
+				fall = 0;
+			}
+			JumpCount = 60;
+			SlideTime = 120;
+		}
+	}
 
 	GameTime++;
 }
 
 void Enemy::FixX()
 {
-	//‰æ–Ê’[‚É“’B‚·‚é‚Æ”½‘Î‚Ì‰æ–Ê’[‚ÉˆÚ“®‚·‚é
-	if (X <= 0)X = GAME_WIDTH - 1;		//‰æ–Ê¶’[
-	else if (GAME_WIDTH <= X)X = 0 + 1;	//‰æ–Ê‰E’[
+	//ç”»é¢ç«¯ã«åˆ°é”ã™ã‚‹ã¨åå¯¾ã®ç”»é¢ç«¯ã«ç§»å‹•ã™ã‚‹
+	if (X <= 0)X = GAME_WIDTH - 1;		//ç”»é¢å·¦ç«¯æ™‚
+	else if (GAME_WIDTH <= X)X = 0 + 1;	//ç”»é¢å³ç«¯æ™‚
 
-	//ƒvƒŒƒCƒ„[‰E’[‚ÌÀ•W‚ğXV
+	//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼å³ç«¯ã®åº§æ¨™ã‚’æ›´æ–°
 	LeftX = X - Width;
 	if (LeftX <= 0)LeftX = GAME_WIDTH + LeftX;
 
-	//ƒvƒŒƒCƒ„[¶’[‚ÌÀ•W‚ğXV
+	//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼å·¦ç«¯ã®åº§æ¨™ã‚’æ›´æ–°
 	RightX = X + Width;
 	if (GAME_WIDTH <= RightX)RightX = RightX - GAME_WIDTH;
 }
@@ -234,55 +257,62 @@ void Enemy::Draw() const {
 	//DrawBox(SIDE_MARGIN + X - Width - GAME_WIDTH, Y - Height, SIDE_MARGIN + X + Width - GAME_WIDTH, Y + Height, 0xff0000, true);
 	//DrawBox(SIDE_MARGIN + X - Width + GAME_WIDTH, Y - Height, SIDE_MARGIN + X + Width + GAME_WIDTH, Y + Height, 0xff0000, true);
 
-	//ƒvƒŒƒCƒ„[•`‰æ
+	//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æç”»
 	int Move = 0;
 
-	//‹ó’†ˆÚ“®
-	if (!Ground)
+	//ç©ºä¸­ç§»å‹•
+	if (Condition == 1)
 	{
 		Move = abs(-2 + (JumpCount / 3 % 4));
 		if (JumpCount == 0)Move += Anim / 25 % 3;
 
-		//ƒQ[ƒ€‰æ–Ê•ª‚ÌŠÔŠu‚ğ‚ ‚¯‚Ä3‘Ì•`‰æ‚·‚é
+		//ã‚²ãƒ¼ãƒ ç”»é¢åˆ†ã®é–“éš”ã‚’ã‚ã‘ã¦3ä½“æç”»ã™ã‚‹
 		DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[8 + Move], true, Turn);
 		DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[8 + Move], true, Turn);
 		DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[8 + Move], true, Turn);
 	}
-	//‘Ò‹@
-	else if (Speed == 0)
+	//å¾…æ©Ÿ
+	else if (Condition == 0)
 	{
-		Move = GameTime / 25 % 3;
-		//ƒQ[ƒ€‰æ–Ê•ª‚ÌŠÔŠu‚ğ‚ ‚¯‚Ä3‘Ì•`‰æ‚·‚é
-		DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[Move], true, Turn);
-		DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[Move], true, Turn);
-		DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[Move], true, Turn);
+		Move = GameTime / 12 % 2;
+		//ã‚²ãƒ¼ãƒ ç”»é¢åˆ†ã®é–“éš”ã‚’ã‚ã‘ã¦3ä½“æç”»ã™ã‚‹
+		if (Takeoff <= 60)
+		{
+			DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[0], true, Turn);
+			DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[0], true, Turn);
+			DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[0], true, Turn);
+		}
+		else if (Takeoff <= 120)
+		{
+			DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[0 + Move], true, Turn);
+			DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[0 + Move], true, Turn);
+			DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[0 + Move], true, Turn);
+		}
+		else if (Takeoff <= 120 + (12 * 3))
+		{
+			DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[2 + Move], true, Turn);
+			DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[2 + Move], true, Turn);
+			DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[2 + Move], true, Turn);
+		}
+		else if (Takeoff <= 120 + (12 * 5))
+		{
+			DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[4 + Move], true, Turn);
+			DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[4 + Move], true, Turn);
+			DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[4 + Move], true, Turn);
+		}
+		else if (Takeoff <= 240)
+		{
+			DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[6 + Move], true, Turn);
+			DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[6 + Move], true, Turn);
+			DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[6 + Move], true, Turn);
+		}
 
 	}
-	////’n–Ê‚ğ‘–‚é
-	//else if (Ground)
-	//{
-	//	Move = Anim / 5 % 3;
-	//	if ((PadX > -0.3 && 0.3 > PadX) ||
-	//		(Speed < 0 && PadX >= 0.3) ||
-	//		(0 < Speed && -0.3 >= PadX)) {
-	//		//ƒQ[ƒ€‰æ–Ê•ª‚ÌŠÔŠu‚ğ‚ ‚¯‚Ä3‘Ì•`‰æ‚·‚é
-	//		DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[11], true, Turn);
-	//		DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[11], true, Turn);
-	//		DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[11], true, Turn);
-	//	}
-	//	else
-	//	{
-	//		DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[8 + Move], true, Turn);
-	//		DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[8 + Move], true, Turn);
-	//		DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[8 + Move], true, Turn);
-	//	}
-	//}
 
-	//DrawCircle(LeftX + SIDE_MARGIN, Y, 2, 0x00ff00, true);
-	//DrawCircle(RightX + SIDE_MARGIN, Y, 2, 0x00ff00, true);
+	DrawCircle(SIDE_MARGIN + X, Y - Height, 2, 0x00ff00, true);
 }
 
-//ƒ}ƒbƒvƒf[ƒ^
+//ãƒãƒƒãƒ—ãƒ‡ãƒ¼ã‚¿
 void Enemy::SetMapData(int MapData[MAP_HEIGHT][MAP_WIDTH]) {
 
 	for (int i = 0; i < MAP_HEIGHT; i++)
@@ -290,6 +320,23 @@ void Enemy::SetMapData(int MapData[MAP_HEIGHT][MAP_WIDTH]) {
 		for (int j = 0; j < MAP_WIDTH; j++)
 		{
 			this->MapData[i][j] = MapData[i][j];
+		}
+	}
+}
+
+//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã«è§¦ã‚Œã‚‹(Xåº§æ¨™ã€Yåº§æ¨™ã€å¹…ã€é«˜ã•)
+void Enemy::HitPlayer(float Px, float Py, float Pw, float Ph)
+{
+	if (fabs(Px - X) < Width * 1.5 && fabs(Py - Y) < Height * 2)
+	{
+		if (fabs((Py + Ph) - (Y - Height)) < Height)
+		{
+			Takeoff = 0;
+			Condition = 0;
+		}
+		else
+		{
+			Speed *= -1;
 		}
 	}
 }

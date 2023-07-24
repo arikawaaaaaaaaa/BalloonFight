@@ -9,7 +9,7 @@ private:
 	float X, Y;	//プレイヤー座標
 	float LeftX, RightX;	//プレイヤーの左右端座標
 
-	//プレイヤーサイズ
+	//プレイヤーサイズの半分
 	float Width = 30 / 2;
 	float Height = 45 / 2;
 
@@ -43,6 +43,13 @@ public:
 
 	void Reset();	//位置リセット
 
-	float GetX() { return X; }	//X座標取得
-	float GetY() { return Y; }	//Y座標取得
+	//座標取得
+	float GetX() { return X; }
+	float GetY() { return Y; }
+
+	//高さ、幅の取得
+	float GetWidth() { return Width; }
+	float GetHeight() { return Height; }
+
+	void HitEnemy(float Ex, float Ey, float Ew, float Eh);	//敵に触れる(X座標、Y座標、幅、高さ)
 };

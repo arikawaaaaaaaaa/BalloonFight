@@ -271,3 +271,19 @@ void Player::SetMapData(int MapData[MAP_HEIGHT][MAP_WIDTH]) {
 		}
 	}
 }
+
+//敵に触れる(X座標、Y座標、幅、高さ)
+void Player::HitEnemy(float Ex, float Ey, float Ew, float Eh)
+{
+	if (fabs(Ex - X) < Width * 1.5 && fabs(Ey - Y) < Height * 2)
+	{
+		if (fabs((Ey + Eh) - (Y - Height)) < Height)
+		{
+			Speed *= -0.9;
+		}
+		else
+		{
+			Speed *= -0.9;
+		}
+	}
+}

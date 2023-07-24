@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include"DxLib.h"
 #include"common.h"
 
@@ -6,33 +6,34 @@ class Enemy
 {
 private:
 
-	float X, Y;	//ƒvƒŒƒCƒ„[À•W
-	float LeftX, RightX;	//ƒvƒŒƒCƒ„[‚Ì¶‰E’[À•W
+	float X, Y;	//æ•µåº§æ¨™
+	float LeftX, RightX;	//æ•µã®å·¦å³ç«¯åº§æ¨™
 
-	//ƒvƒŒƒCƒ„[ƒTƒCƒY
+	//æ•µã‚µã‚¤ã‚ºã®åŠåˆ†
 	float Width = 30 / 2;
 	float Height = 45 / 2;
 
-	float Speed;	//ˆÚ“®‘¬“x
-	bool Turn = true;		//¶‰E”½“]
-	int AirMove;	//‹ó’†‚Å‚Ì¶‰EˆÚ“®ó•t
-	float fall;		//—‰º‘¬“x
+	float Speed;	//ç§»å‹•é€Ÿåº¦
+	bool Turn = true;		//å·¦å³åè»¢
+	int AirMove;	//ç©ºä¸­ã§ã®å·¦å³ç§»å‹•å—ä»˜
+	float fall;		//è½ä¸‹é€Ÿåº¦
 
-	int JumpCount;	//ƒWƒƒƒ“ƒv“ü—ÍŠÔŠu
-	bool Ground = true;	//’n–Ê‚É‚¢‚é‚©H
+	int JumpCount;	//ã‚¸ãƒ£ãƒ³ãƒ—å…¥åŠ›é–“éš”
+	int Condition = 0;	//ç¾åœ¨ã®çŠ¶æ…‹(0:åœ°é¢ 1:é€šå¸¸é£›è¡Œ 2:ãƒ‘ãƒ©ã‚·ãƒ¥ãƒ¼ãƒˆ)
+	int Takeoff = 0;	//é¢¨èˆ¹ã‚’è†¨ã‚‰ã¾ã›ã¦é£›ã³ä¸ŠãŒã‚‹ã¾ã§ã®æ™‚é–“
 
-	bool Flying = false;	//”òs‚·‚é‚©H
-	int SlideTime = 0;		//‰¡ˆÚ“®‚·‚éŠÔ
-	float MovePower = 0;	//ƒLƒƒƒ‰ˆÚ“®‚Ì‰Á‘¬“x
+	bool Flying = false;	//é£›è¡Œã™ã‚‹ã‹ï¼Ÿ
+	int SlideTime = 0;		//æ¨ªç§»å‹•ã™ã‚‹æ™‚é–“
+	float MovePower = 0;	//ã‚­ãƒ£ãƒ©ç§»å‹•ã®åŠ é€Ÿåº¦
 
-	float PadX;	//‰¡•ûŒü“ü—Í’l
+	float PadX;	//æ¨ªæ–¹å‘å…¥åŠ›å€¤
 
-	int Image[18];	//‰æ‘œ
-	int Anim = 0;	//ƒAƒjƒ[ƒVƒ‡ƒ“ŠÇ—
+	int Image[18];	//ç”»åƒ
+	int Anim = 0;	//ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç®¡ç†
 
-	int GameTime = 0;	//Œo‰ßŠÔ
+	int GameTime = 0;	//çµŒéæ™‚é–“
 
-	int MapData[MAP_HEIGHT][MAP_WIDTH];	//ƒ}ƒbƒvƒf[ƒ^
+	int MapData[MAP_HEIGHT][MAP_WIDTH];	//ãƒãƒƒãƒ—ãƒ‡ãƒ¼ã‚¿
 
 public:
 
@@ -42,9 +43,19 @@ public:
 
 	void SetMapData(int MapData[MAP_HEIGHT][MAP_WIDTH]);
 
-	void FixX();	//‰æ–Ê’[‚Ìƒ[ƒv‚Æ¶‰E’[‚ÌÀ•W‚ÌXV
+	void FixX();	//ç”»é¢ç«¯ã®ãƒ¯ãƒ¼ãƒ—ã¨å·¦å³ç«¯ã®åº§æ¨™ã®æ›´æ–°
 
-	void Reset();	//ˆÊ’uƒŠƒZƒbƒg
+	//åº§æ¨™å–å¾—
+	float GetX() { return X; }
+	float GetY() { return Y; }
+
+	//é«˜ã•ã€å¹…ã®å–å¾—
+	float GetWidth() { return Width; }
+	float GetHeight() { return Height; }
+
+	void HitPlayer(float Px, float Py, float Pw, float Ph);	//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã«è§¦ã‚Œã‚‹(Xåº§æ¨™ã€Yåº§æ¨™ã€å¹…ã€é«˜ã•)
+
+	void Reset();	//ä½ç½®ãƒªã‚»ãƒƒãƒˆ
 };
 
 

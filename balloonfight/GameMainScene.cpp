@@ -210,7 +210,12 @@ AbstractScene* GameMainScene::Update()
 	{
 		if (enemy[i] != nullptr) 
 		{
+			//敵情報の更新
 			enemy[i]->Update(player.GetX(), player.GetY());
+
+			//敵とプレイヤーの当たり
+			enemy[i]->HitPlayer(player.GetX(), player.GetY(), player.GetWidth(), player.GetHeight());
+			player.HitEnemy(enemy[i]->GetX(), enemy[i]->GetY(), enemy[i]->GetWidth(), enemy[i]->GetHeight());
 		}
 	}
 
