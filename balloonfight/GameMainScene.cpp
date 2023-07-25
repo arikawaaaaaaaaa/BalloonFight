@@ -214,8 +214,11 @@ AbstractScene* GameMainScene::Update()
 			enemy[i]->Update(player.GetX(), player.GetY());
 
 			//敵とプレイヤーの当たり
+			if (enemy[i]->GetCondition() != 0 && enemy[i]->GetCondition() != 3)
+			{
+				player.HitEnemy(enemy[i]->GetX(), enemy[i]->GetY(), enemy[i]->GetWidth(), enemy[i]->GetHeight());
+			}
 			enemy[i]->HitPlayer(player.GetX(), player.GetY(), player.GetWidth(), player.GetHeight());
-			player.HitEnemy(enemy[i]->GetX(), enemy[i]->GetY(), enemy[i]->GetWidth(), enemy[i]->GetHeight());
 		}
 	}
 
@@ -256,21 +259,6 @@ void GameMainScene::Draw() const
 	//{
 	//	DrawLine(0, BLOCK_SIZE * i, SCREEN_WIDTH, BLOCK_SIZE * i, 0xffffff);
 	//}
-
-	player.Draw();
-
-	//敵更新
-	for (int i = 0; i < ENEMY_MAX; i++)
-	{
-		if (enemy[i] != nullptr)
-		{
-			enemy[i]->Draw();
-		}
-	}
-
-	//足場を描画
-	if (Level + 1 <= 3) DrawGraph(SIDE_MARGIN, SCREEN_HEIGHT - 80, Ground[0], true);
-	else				DrawGraph(SIDE_MARGIN, SCREEN_HEIGHT - 80, Ground[1], true);
 
 	//足場・ステージ１
 	if (Level == 0) 
@@ -362,6 +350,21 @@ void GameMainScene::Draw() const
 			}
 		}
 	}
+
+	player.Draw();
+
+	//敵更新
+	for (int i = 0; i < ENEMY_MAX; i++)
+	{
+		if (enemy[i] != nullptr)
+		{
+			enemy[i]->Draw();
+		}
+	}
+
+	//地面を描画
+	if (Level + 1 <= 3) DrawGraph(SIDE_MARGIN, SCREEN_HEIGHT - 80, Ground[0], true);
+	else				DrawGraph(SIDE_MARGIN, SCREEN_HEIGHT - 80, Ground[1], true);
 
 	//画面端の空間
 	DrawBox(0, 0, SIDE_MARGIN, SCREEN_HEIGHT, 0x000000, true);

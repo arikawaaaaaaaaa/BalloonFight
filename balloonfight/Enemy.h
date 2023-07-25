@@ -19,8 +19,9 @@ private:
 	float fall;		//落下速度
 
 	int JumpCount;	//ジャンプ入力間隔
-	int Condition = 0;	//現在の状態(0:地面 1:通常飛行 2:パラシュート)
+	int Condition = 0;	//現在の状態(0:地面 1:通常飛行 2:パラシュート 3:撃破)
 	int Takeoff = 0;	//風船を膨らませて飛び上がるまでの時間
+	int Paraangle = 0;	//パラシュートのX軸移動方向
 
 	bool Flying = false;	//飛行するか？
 	int SlideTime = 0;		//横移動する時間
@@ -52,6 +53,9 @@ public:
 	//高さ、幅の取得
 	float GetWidth() { return Width; }
 	float GetHeight() { return Height; }
+
+	//敵状態の取得
+	int GetCondition() { return Condition; }
 
 	void HitPlayer(float Px, float Py, float Pw, float Ph);	//プレイヤーに触れる(X座標、Y座標、幅、高さ)
 

@@ -67,7 +67,7 @@ void Player::Update() {
 		fall *= -1;
 	}
 
-	Ground = false;
+	Condition = 1;
 
 	//床で落下が阻まれる
 	while (MapData[(int)(Y + Height) / BlockSize][(int)LeftX / BlockSize] > 0 ||
@@ -76,7 +76,7 @@ void Player::Update() {
 		SCREEN_HEIGHT + BLOCK_SIZE * 2 <= Y + Height + 1)
 	{
 		Y -= 0.1;
-		Ground = true;
+		Condition = 0;
 		if (fall > 0.f)
 		{
 			fall = 0;
@@ -86,23 +86,23 @@ void Player::Update() {
 	//左右移動-------------------------------------------
 	float MaxSpeed = 2.3;
 
-	if (Ground || AirMove)
+	if (Condition == 0 || AirMove)
 	{
 		if (PadX >= 0.3) {
-			if (Speed < 0 && Ground)Speed += 0.2;
+			if (Speed < 0 && Condition == 0)Speed += 0.2;
 			Turn = true;
 			Speed += 0.2;
 			Anim++;
 			if (MaxSpeed < Speed)Speed = MaxSpeed;
 		}
 		else if (PadX <= -0.3) {
-			if (0 < Speed && Ground)Speed -= 0.2;
+			if (0 < Speed && Condition == 0)Speed -= 0.2;
 			Turn = false;
 			Speed -= 0.2;
 			Anim++;
 			if (Speed < -MaxSpeed)Speed = -MaxSpeed;
 		}
-		else if (Ground)
+		else if (Condition == 0)
 		{
 			if (0 < Speed)
 			{
@@ -195,7 +195,9 @@ void Player::Reset()
 	RightX = X + Width;
 
 	Speed = 0;
-	fall = 1;
+	fall = 1; 
+	
+	Balloon = 2;
 
 	JumpCount = 0;
 }
@@ -210,7 +212,7 @@ void Player::Draw() const {
 	int Move = 0;
 
 	//空中移動
-	if (!Ground) 
+	if (Condition != 0)
 	{
 		Move = abs(-2 + (JumpCount / 3 % 4));
 		if (JumpCount == 0)Move += Anim / 25 % 3;
@@ -231,7 +233,7 @@ void Player::Draw() const {
 		
 	}
 	//地面を走る
-	else if (Ground)
+	else if (Condition == 0)
 	{
 		Move = Anim / 5 % 3;
 		if ((PadX > -0.3 && 0.3 > PadX) ||
@@ -277,13 +279,38 @@ void Player::HitEnemy(float Ex, float Ey, float Ew, float Eh)
 {
 	if (fabs(Ex - X) < Width * 1.5 && fabs(Ey - Y) < Height * 2)
 	{
+		//敵に風船を割られる
 		if (fabs((Ey + Eh) - (Y - Height)) < Height)
 		{
-			Speed *= -0.9;
 		}
-		else
+
+		//敵に触れて跳ね返る
+		//縦方向に跳ね返る
+		if (fabs((Ey + Eh) - (Y - Height)) <= 5 ||
+			fabs((Ey - Eh) - (Y + Height)) <= 5)
 		{
-			Speed *= -0.9;
+			if (Ey < Y && fall < 0)
+			{
+				fall *= -1;
+			}
+			if (Y < Ey && 0 < fall)
+			{
+				fall *= -1;
+			}
 		}
+		//横方向に跳ね返る
+		else if (fabs((Ex + Ew) - (X - Width)) <= 12 ||
+				 fabs((Ex - Ew) - (X + Width)) <= 12)
+		{
+			if (Ex < X && Speed <= 0)
+			{
+				Speed *= -0.9;
+			}
+			if (X < Ex && 0 <= Speed)
+			{
+				Speed *= -0.9;
+			}
+		}
+
 	}
 }

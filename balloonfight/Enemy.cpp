@@ -218,6 +218,101 @@ void Enemy::Update(float Px, float Py) {
 			SlideTime = 120;
 		}
 	}
+	else if (Condition == 2)
+	{
+		Takeoff++;
+
+		float MaxSpeed = 2;
+
+		if (24 < Takeoff)
+		{
+			Speed += 0.03 * Paraangle;
+
+			if (Speed < -MaxSpeed)
+			{
+				Speed = -MaxSpeed;
+				Paraangle *= -1;
+			}
+
+			if (MaxSpeed < Speed)
+			{
+				Speed = MaxSpeed;
+				Paraangle *= -1;
+			}
+
+			X += Speed;
+			FixX();
+
+			bool WallHit = false;
+			//壁で移動を止める
+			bool Wall = false;
+			for (float i = 0; i < Height && !Wall; i++)
+			{
+				if (MapData[(int)(Y + i) / BlockSize][(int)RightX / BlockSize] > 0) Wall = true;
+				if (MapData[(int)(Y - i) / BlockSize][(int)RightX / BlockSize] > 0) Wall = true;
+			}
+			while (Wall)
+			{
+				X--;
+				FixX();
+				WallHit = true;
+
+				Wall = false;
+				for (float i = 0; i < Height && !Wall; i++)
+				{
+					if (MapData[(int)(Y + i) / BlockSize][(int)RightX / BlockSize] > 0) Wall = true;
+					if (MapData[(int)(Y - i) / BlockSize][(int)RightX / BlockSize] > 0) Wall = true;
+				}
+			}
+
+			Wall = false;
+			for (float i = 0; i < Height && !Wall; i++)
+			{
+				if (MapData[(int)(Y + i) / BlockSize][(int)LeftX / BlockSize] > 0) Wall = true;
+				if (MapData[(int)(Y - i) / BlockSize][(int)LeftX / BlockSize] > 0) Wall = true;
+			}
+			while (Wall)
+			{
+				X++;
+				FixX();
+				WallHit = true;
+
+				Wall = false;
+				for (float i = 0; i < Height && !Wall; i++)
+				{
+					if (MapData[(int)(Y + i) / BlockSize][(int)LeftX / BlockSize] > 0) Wall = true;
+					if (MapData[(int)(Y - i) / BlockSize][(int)LeftX / BlockSize] > 0) Wall = true;
+				}
+			}
+
+			if (WallHit) 
+			{
+				Speed *= -1;
+				Paraangle *= -1;
+			}
+
+			Y += 0.5;
+
+			while (MapData[(int)(Y + Height) / BlockSize][(int)LeftX / BlockSize] > 0 ||
+				MapData[(int)(Y + Height) / BlockSize][(int)X / BlockSize] > 0 ||
+				MapData[(int)(Y + Height) / BlockSize][(int)RightX / BlockSize] > 0 ||
+				SCREEN_HEIGHT + BLOCK_SIZE * 2 <= Y + Height + 1)
+			{
+				Y--;
+				Condition = 0;
+				Takeoff = 0;
+			}
+		}
+	}
+	else if (Condition == 3) 
+	{
+		float FallMax = 4;		//落下の最大速度
+
+		fall += 0.1;
+		if (FallMax < fall)fall = FallMax;
+
+		Y += fall;
+	}
 
 	GameTime++;
 }
@@ -308,8 +403,44 @@ void Enemy::Draw() const {
 		}
 
 	}
+	else if (Condition == 2) 
+	{
+		//ゲーム画面分の間隔をあけて3体描画する
+		if (Takeoff < 6)
+		{
+			DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[13], true, Turn);
+			DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[13], true, Turn);
+			DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[13], true, Turn);
+		}
+		else if (Takeoff < 12)
+		{
+			DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[15], true, Turn);
+			DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[15], true, Turn);
+			DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[15], true, Turn);
+		}
+		else if (Takeoff < 18)
+		{
+			DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[16], true, Turn);
+			DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[16], true, Turn);
+			DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[16], true, Turn);
+		}
+		else
+		{
+			DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[17], true, Turn);
+			DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[17], true, Turn);
+			DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[17], true, Turn);
+		}
+	}
+	else if (Condition == 3)
+	{
+		Move = GameTime / 3 % 2;
+		//ゲーム画面分の間隔をあけて3体描画する
+		DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[13 + Move] , true, Turn);
+		DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[13 + Move], true, Turn);
+		DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[13 + Move], true, Turn);
+	}
 
-	DrawCircle(SIDE_MARGIN + X, Y - Height, 2, 0x00ff00, true);
+	//DrawCircle(SIDE_MARGIN + X, Y - Height, 2, 0x00ff00, true);
 }
 
 //マップデータ
@@ -327,16 +458,78 @@ void Enemy::SetMapData(int MapData[MAP_HEIGHT][MAP_WIDTH]) {
 //プレイヤーに触れる(X座標、Y座標、幅、高さ)
 void Enemy::HitPlayer(float Px, float Py, float Pw, float Ph)
 {
-	if (fabs(Px - X) < Width * 1.5 && fabs(Py - Y) < Height * 2)
+	if (fabs(Px - X) < Width * 1.5 && fabs(Py - Y) < Height * 2 && Condition != 3)
 	{
+		//プレイヤーに風船・パラシュートを割られる
 		if (fabs((Py + Ph) - (Y - Height)) < Height)
 		{
-			Takeoff = 0;
-			Condition = 0;
+			//風船を割られてパラシュート状態になる
+			if (Condition == 1)
+			{
+				Speed = 0;
+				fall = 0;
+				Takeoff = 0;
+				Condition = 2;
+
+				if (Px < X)Paraangle = -1;
+				else	   Paraangle = 1;
+
+				return;
+			}
+			//パラシュートを壊されて撃破される
+			else if (Condition == 2 && 24 < Takeoff)
+			{
+				Speed = 0;
+				fall = -3;
+				Takeoff = 0;
+				Condition = 3;
+				return;
+			}
 		}
-		else
+		//地面で触れられて撃破される
+		else if (Condition == 0)
 		{
-			Speed *= -1;
+			Speed = 0;
+			fall = -3;
+			Takeoff = 0;
+			Condition = 3;
+			return;
 		}
+
+		//プレイヤーに触れて跳ね返る
+		//縦方向に跳ね返る
+		if (fabs((Py + Ph) - (Y - Height)) <= 5 ||
+			fabs((Py - Ph) - (Y + Height)) <= 5)
+		{
+			if (Py < Y && fall < 0)
+			{
+				fall *= -1;
+			}
+			if (Y < Py && 0 < fall)
+			{
+				fall *= -1;
+			}
+		}
+		else if (fabs((Px + Pw) - (X - Width)) <= 12 ||
+				 fabs((Px - Pw) - (X + Width)) <= 12)
+		{
+			if (Px < X && Speed <= 0)
+			{
+				Speed *= -1;
+				while (X - Width < Px + Pw)
+				{
+					X++;
+				}
+			}
+			if (X < Px && 0 <= Speed)
+			{
+				Speed *= -1;
+				while (Px - Pw < X + Width)
+				{
+					X--;
+				}
+			}
+		}
+
 	}
 }
