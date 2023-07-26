@@ -12,6 +12,7 @@ private:
 	Enemy** enemy;
 
 	int Level;	//ステージ数
+	int Score;	//スコア
 
 	int Ground[10];	//足場
 

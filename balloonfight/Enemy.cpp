@@ -458,7 +458,7 @@ void Enemy::SetMapData(int MapData[MAP_HEIGHT][MAP_WIDTH]) {
 //プレイヤーに触れる(X座標、Y座標、幅、高さ)
 void Enemy::HitPlayer(float Px, float Py, float Pw, float Ph)
 {
-	if (fabs(Px - X) < Width * 1.5 && fabs(Py - Y) < Height * 2 && Condition != 3)
+	if (fabs(Px - X) < Width * 2 && fabs(Py - Y) < Height * 2 && Condition != 3)
 	{
 		//プレイヤーに風船・パラシュートを割られる
 		if (fabs((Py + Ph) - (Y - Height)) < Height)
@@ -497,39 +497,70 @@ void Enemy::HitPlayer(float Px, float Py, float Pw, float Ph)
 		}
 
 		//プレイヤーに触れて跳ね返る
-		//縦方向に跳ね返る
-		if (fabs((Py + Ph) - (Y - Height)) <= 5 ||
-			fabs((Py - Ph) - (Y + Height)) <= 5)
+
+		enum Angle
 		{
-			if (Py < Y && fall < 0)
+			UP,
+			DOWN,
+			RIGHT,
+			LEFT
+		};
+		Angle angle;	//どの方向から触れたか記録する変数
+
+		//敵とプレイヤーの対応する辺同士の距離を調べる
+		float Up = fabs((Py - Ph) - (Y + Height));		//プレイヤー上辺と敵下辺の差
+		float Down = fabs((Y - Height) - (Py + Ph));	//敵上辺とプレイヤー下辺の差
+		float Right = fabs((X - Width) - (Px + Pw));	//敵左辺とプレイヤー右辺の差
+		float Left = fabs((Px - Pw) - (X + Width));		//プレイヤー左辺と敵右辺の差
+
+		//4つの変数のうち、最も値の小さいものを触れた方向とする
+		if (Up < Down) 
+		{
+			if (Up < Right) 
 			{
-				fall *= -1;
+				if (Up < Left)  angle = UP;
+				else			angle = LEFT;
 			}
-			if (Y < Py && 0 < fall)
+			else
 			{
-				fall *= -1;
+				if (Right < Left)  angle = RIGHT;
+				else			   angle = LEFT;
 			}
 		}
-		else if (fabs((Px + Pw) - (X - Width)) <= 12 ||
-				 fabs((Px - Pw) - (X + Width)) <= 12)
+		else
 		{
-			if (Px < X && Speed <= 0)
+			if (Down < Right)
 			{
-				Speed *= -1;
-				while (X - Width < Px + Pw)
-				{
-					X++;
-				}
+				if (Down < Left)  angle = DOWN;
+				else			angle = LEFT;
 			}
-			if (X < Px && 0 <= Speed)
+			else
 			{
-				Speed *= -1;
-				while (Px - Pw < X + Width)
-				{
-					X--;
-				}
+				if (Right < Left)  angle = RIGHT;
+				else			   angle = LEFT;
 			}
 		}
 
+		switch (angle)
+		{
+		case UP:
+			if (0 < fall)fall *= -1;
+			break;
+
+		case DOWN:
+			if (fall < 0)fall *= -1;
+			break;
+
+		case RIGHT:
+			if (Speed < 0)Speed *= -1;
+			break;
+
+		case LEFT:
+			if (0 < Speed)Speed *= -1;
+			break;
+
+		default:
+			break;
+		}
 	}
 }

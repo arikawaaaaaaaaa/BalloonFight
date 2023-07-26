@@ -21,6 +21,7 @@ private:
 	int JumpCount;	//ジャンプ入力間隔
 	int Condition = 0;	//現在の状態(0:地面 1:通常飛行 2:ミス)
 	int Balloon = 2;	//風船の数
+	int Vincible = 0;	//被ダメージ後の無敵時間
 
 
 	float PadX;	//横方向入力値

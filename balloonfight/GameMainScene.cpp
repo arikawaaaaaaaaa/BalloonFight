@@ -165,6 +165,7 @@ int Stage[5][MAP_HEIGHT][MAP_WIDTH] =
 GameMainScene::GameMainScene()
 {
 	Level = 0;
+	Score = 0;
 	player.SetMapData(Stage[Level]);
 
 	enemy = new Enemy * [ENEMY_MAX];
