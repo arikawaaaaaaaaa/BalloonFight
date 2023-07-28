@@ -211,6 +211,7 @@ void Player::Reset()
 	fall = 1; 
 	
 	Balloon = 2;
+	Condition = 0;
 
 	JumpCount = 0;
 }
@@ -318,7 +319,7 @@ void Player::SetMapData(int MapData[MAP_HEIGHT][MAP_WIDTH]) {
 //敵に触れる(X座標、Y座標、幅、高さ)
 void Player::HitEnemy(float Ex, float Ey, float Ew, float Eh)
 {
-	if (fabs(Ex - X) < Width * 2 && fabs(Ey - Y) < Height * 2)
+	if (fabs(Ex - X) < Width * 2 && fabs(Ey - Y) < Height * 2 && Condition != 2)
 	{
 		DrawFormatString(500, 100, 0xffffff, "HIT");
 		//敵に風船を割られる
@@ -329,6 +330,7 @@ void Player::HitEnemy(float Ex, float Ey, float Ew, float Eh)
 			{
 				Vincible = 12;
 				Balloon = 1;
+				return;
 			}
 			//風船の数が1個の場合、ミスの状態にする
 			else if (Balloon == 1 && !Vincible)
@@ -337,6 +339,7 @@ void Player::HitEnemy(float Ex, float Ey, float Ew, float Eh)
 				Speed = 0;
 				fall = -3;
 				Condition = 2;
+				return;
 			}
 		}
 

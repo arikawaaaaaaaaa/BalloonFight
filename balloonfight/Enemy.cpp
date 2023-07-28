@@ -466,10 +466,16 @@ void Enemy::HitPlayer(float Px, float Py, float Pw, float Ph)
 			//風船を割られてパラシュート状態になる
 			if (Condition == 1)
 			{
+				//速度、落下速度をリセット
 				Speed = 0;
 				fall = 0;
+
+				//状態を変化させる
 				Takeoff = 0;
 				Condition = 2;
+
+				//スコアを加算する
+				Score = 500;
 
 				if (Px < X)Paraangle = -1;
 				else	   Paraangle = 1;
@@ -479,20 +485,32 @@ void Enemy::HitPlayer(float Px, float Py, float Pw, float Ph)
 			//パラシュートを壊されて撃破される
 			else if (Condition == 2 && 24 < Takeoff)
 			{
+				//速度、落下速度をリセット
 				Speed = 0;
 				fall = -3;
+
+				//状態を変化させる
 				Takeoff = 0;
 				Condition = 3;
+
+				//スコアを加算する
+				Score = 1000;
 				return;
 			}
 		}
 		//地面で触れられて撃破される
 		else if (Condition == 0)
 		{
+			//速度、落下速度をリセット
 			Speed = 0;
 			fall = -3;
+
+			//状態を変化させる
 			Takeoff = 0;
 			Condition = 3;
+
+			//スコアを加算する
+			Score = 750;
 			return;
 		}
 
@@ -562,5 +580,92 @@ void Enemy::HitPlayer(float Px, float Py, float Pw, float Ph)
 		default:
 			break;
 		}
+	}
+}
+
+//スコアを加算する
+int Enemy::AddScore() 
+{
+	//加算するスコアを代入
+	int Score = this->Score;
+
+	//敵のスコアをリセットする
+	this->Score = 0;
+
+	//初めのスコアを返す
+	return Score;
+}
+
+//敵同士で触れる(X座標、Y座標、幅、高さ)
+void Enemy::HitEnemy(float Ex, float Ey, float Ew, float Eh)
+{
+	if (fabs(Ex - X) < Width * 2 && fabs(Ey - Y) < Height * 2 && Condition != 2)
+	{
+		//敵に触れて跳ね返る
+		enum Angle
+		{
+			UP,
+			DOWN,
+			RIGHT,
+			LEFT
+		};
+		Angle angle;	//どの方向から触れたか記録する変数
+
+		//敵とプレイヤーの対応する辺同士の距離を調べる
+		float Up = fabs((Ey - Eh) - (Y + Height));		//敵上辺とプレイヤー下辺の差
+		float Down = fabs((Y - Height) - (Ey + Eh));	//プレイヤー上辺と敵下辺の差
+		float Right = fabs((X - Width) - (Ex + Ew));	//プレイヤー左辺と敵右辺の差
+		float Left = fabs((Ex - Ew) - (X + Width));		//敵左辺とプレイヤー右辺の差
+
+		//4つの変数のうち、最も値の小さいものを触れた方向とする
+		if (Up < Down)
+		{
+			if (Up < Right)
+			{
+				if (Up < Left)  angle = UP;
+				else			angle = LEFT;
+			}
+			else
+			{
+				if (Right < Left)  angle = RIGHT;
+				else			   angle = LEFT;
+			}
+		}
+		else
+		{
+			if (Down < Right)
+			{
+				if (Down < Left)  angle = DOWN;
+				else			angle = LEFT;
+			}
+			else
+			{
+				if (Right < Left)  angle = RIGHT;
+				else			   angle = LEFT;
+			}
+		}
+
+		switch (angle)
+		{
+		case UP:
+			if (0 < fall)fall *= -1;
+			break;
+
+		case DOWN:
+			if (fall < 0)fall *= -1;
+			break;
+
+		case RIGHT:
+			if (Speed < 0)Speed *= -1;
+			break;
+
+		case LEFT:
+			if (0 < Speed)Speed *= -1;
+			break;
+
+		default:
+			break;
+		}
+
 	}
 }

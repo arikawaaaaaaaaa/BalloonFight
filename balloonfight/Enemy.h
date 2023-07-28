@@ -34,6 +34,8 @@ private:
 
 	int GameTime = 0;	//経過時間
 
+	int Score = 0;	//獲得スコア
+
 	int MapData[MAP_HEIGHT][MAP_WIDTH];	//マップデータ
 
 public:
@@ -57,7 +59,11 @@ public:
 	//敵状態の取得
 	int GetCondition() { return Condition; }
 
+	//スコア加算
+	int AddScore();
+
 	void HitPlayer(float Px, float Py, float Pw, float Ph);	//プレイヤーに触れる(X座標、Y座標、幅、高さ)
+	void HitEnemy(float Ex, float Ey, float Ew, float Eh);	//敵同士で触れる(X座標、Y座標、幅、高さ)
 
 	void Reset();	//位置リセット
 };

@@ -169,13 +169,22 @@ GameMainScene::GameMainScene()
 	player.SetMapData(Stage[Level]);
 
 	enemy = new Enemy * [ENEMY_MAX];
+	bubble = new Bubble * [ENEMY_MAX];
 
 	for (int i = 0; i < ENEMY_MAX; i++)
 	{
 		enemy[i] = nullptr;
+		bubble[i] = nullptr;
 	}
+
 	enemy[0] = new Enemy(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 	enemy[0]->SetMapData(Stage[Level]);
+
+	enemy[1] = new Enemy(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2);
+	enemy[1]->SetMapData(Stage[Level]);
+
+	enemy[2] = new Enemy(SCREEN_WIDTH / 2 + 100, SCREEN_HEIGHT / 2);
+	enemy[2]->SetMapData(Stage[Level]);
 
 	//地面
 	Ground[0] = LoadGraph("images/GroundA.png");
@@ -199,6 +208,8 @@ GameMainScene::GameMainScene()
 	Ground[8] = LoadGraph("images/Lv5_footA.png");
 	Ground[9] = LoadGraph("images/Lv5_footB.png");
 
+	//海
+	Ground[10] = LoadGraph("images/Sea.png");
 }
 
 AbstractScene* GameMainScene::Update() 
@@ -220,6 +231,49 @@ AbstractScene* GameMainScene::Update()
 				player.HitEnemy(enemy[i]->GetX(), enemy[i]->GetY(), enemy[i]->GetWidth(), enemy[i]->GetHeight());
 			}
 			enemy[i]->HitPlayer(player.GetX(), player.GetY(), player.GetWidth(), player.GetHeight());
+
+			//敵同士の当たり
+			for (int j = 0; j < ENEMY_MAX; j++)
+			{
+				if (enemy[j] != nullptr && i != j) 
+				{
+					enemy[i]->HitEnemy(enemy[j]->GetX(), enemy[j]->GetY(), enemy[j]->GetWidth(), enemy[j]->GetHeight());
+				}
+			}
+
+			//スコアを加算する
+			Score += enemy[i]->AddScore();
+
+			//海に落ちたらその敵が消えて泡を出す
+			if (SCREEN_HEIGHT < enemy[i]->GetY()) 
+			{
+				for (int s = 0; s < ENEMY_MAX; s++)
+				{
+					if (bubble[s] == nullptr)
+					{
+						bubble[s] = new Bubble(enemy[i]->GetX(), SCREEN_HEIGHT);
+						break;
+					}
+				}
+				enemy[i] = nullptr;
+			}
+		}
+	}
+
+	//泡更新
+	for (int i = 0; i < ENEMY_MAX; i++)
+	{
+		if (bubble[i] != nullptr)
+		{
+			//敵情報の更新
+			bubble[i]->Update(player.GetX(), player.GetY());
+
+			bubble[i]->HitPlayer(player.GetX(), player.GetY(), player.GetWidth(), player.GetHeight());
+
+			//スコアを加算する
+			Score += bubble[i]->AddScore();
+
+			if (bubble[i]->Burst())bubble[i] = nullptr;
 		}
 	}
 
@@ -238,16 +292,28 @@ AbstractScene* GameMainScene::Update()
 		}
 		enemy[0] = new Enemy(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 		enemy[0]->SetMapData(Stage[Level]);
+
+		enemy[1] = new Enemy(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2);
+		enemy[1]->SetMapData(Stage[Level]);
+
+		enemy[2] = new Enemy(SCREEN_WIDTH / 2 + 100, SCREEN_HEIGHT / 2);
+		enemy[2]->SetMapData(Stage[Level]);
 	}
 
 #endif // DEBUG
 	return this;
 }
 
+void GameMainScene::Fish()
+{
+	
+}
+
 void GameMainScene::Draw() const
 {
 #ifdef DEBUG
 	DrawFormatString(100, 50, 0xffffff, "STAGE %d", Level + 1);
+	DrawFormatString(200, 50, 0xffffff, "SCORE %d", Score);
 	DrawFormatString(100, 100, 0xffffff, "PRESS START");
 #endif // DEBUG
 
@@ -352,6 +418,10 @@ void GameMainScene::Draw() const
 		}
 	}
 
+	//地面を描画
+	if (Level + 1 <= 3) DrawGraph(SIDE_MARGIN, SCREEN_HEIGHT - 80, Ground[0], true);
+	else				DrawGraph(SIDE_MARGIN, SCREEN_HEIGHT - 80, Ground[1], true);
+
 	player.Draw();
 
 	//敵更新
@@ -361,11 +431,15 @@ void GameMainScene::Draw() const
 		{
 			enemy[i]->Draw();
 		}
+
+		if (bubble[i] != nullptr)
+		{
+			bubble[i]->Draw();
+		}
 	}
 
-	//地面を描画
-	if (Level + 1 <= 3) DrawGraph(SIDE_MARGIN, SCREEN_HEIGHT - 80, Ground[0], true);
-	else				DrawGraph(SIDE_MARGIN, SCREEN_HEIGHT - 80, Ground[1], true);
+	//海
+	DrawGraph(SIDE_MARGIN, SCREEN_HEIGHT - 80, Ground[10], true);
 
 	//画面端の空間
 	DrawBox(0, 0, SIDE_MARGIN, SCREEN_HEIGHT, 0x000000, true);
