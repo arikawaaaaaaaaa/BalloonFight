@@ -313,6 +313,10 @@ void Enemy::Update(float Px, float Py) {
 
 		Y += fall;
 	}
+	else if (Condition == 4) 
+	{
+		Y = SCREEN_HEIGHT + 1;
+	}
 
 	GameTime++;
 }

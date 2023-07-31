@@ -24,7 +24,7 @@ void Player::Update() {
 	InitPad();
 	int BlockSize = BLOCK_SIZE;
 
-	if (Condition != 2)
+	if (Condition == 0 || Condition == 1)
 	{
 		//上下移動-----------------------------------------------------------
 		float JumpPow = -0.1;	//ジャンプ力
@@ -179,6 +179,10 @@ void Player::Update() {
 
 		Y += fall;
 	}
+	else if (Condition == 3)
+	{
+		Y = SCREEN_HEIGHT + 1;
+	}
 
 	GameTime++;
 	if (--Vincible < 0)Vincible = 0;
@@ -202,10 +206,12 @@ void Player::FixX()
 void Player::Reset()
 {
 	X = BLOCK_SIZE * 5 + Width;
-	Y = BLOCK_SIZE * 20;
+	Y = 377;
 
 	LeftX = X - Width;
 	RightX = X + Width;
+
+	Turn = true;
 
 	Speed = 0;
 	fall = 1; 

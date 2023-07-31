@@ -19,7 +19,7 @@ private:
 	float fall;		//落下速度
 
 	int JumpCount;	//ジャンプ入力間隔
-	int Condition = 0;	//現在の状態(0:地面 1:通常飛行 2:ミス)
+	int Condition = 0;	//現在の状態(0:地面 1:通常飛行 2:ミス 3:魚に食べられた)
 	int Balloon = 2;	//風船の数
 	int Vincible = 0;	//被ダメージ後の無敵時間
 
@@ -53,6 +53,9 @@ public:
 	//高さ、幅の取得
 	float GetWidth() { return Width; }
 	float GetHeight() { return Height; }
+
+	//魚に食べられた
+	void Eaten() { Condition = 3; }
 
 	void HitEnemy(float Ex, float Ey, float Ew, float Eh);	//敵に触れる(X座標、Y座標、幅、高さ)
 };

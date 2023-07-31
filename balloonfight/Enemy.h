@@ -19,7 +19,7 @@ private:
 	float fall;		//落下速度
 
 	int JumpCount;	//ジャンプ入力間隔
-	int Condition = 0;	//現在の状態(0:地面 1:通常飛行 2:パラシュート 3:撃破)
+	int Condition = 0;	//現在の状態(0:地面 1:通常飛行 2:パラシュート 3:撃破 4:魚に食べられた)
 	int Takeoff = 0;	//風船を膨らませて飛び上がるまでの時間
 	int Paraangle = 0;	//パラシュートのX軸移動方向
 
@@ -61,6 +61,9 @@ public:
 
 	//スコア加算
 	int AddScore();
+
+	//魚に食べられた
+	void Eaten() { Condition = 4; }
 
 	void HitPlayer(float Px, float Py, float Pw, float Ph);	//プレイヤーに触れる(X座標、Y座標、幅、高さ)
 	void HitEnemy(float Ex, float Ey, float Ew, float Eh);	//敵同士で触れる(X座標、Y座標、幅、高さ)

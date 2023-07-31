@@ -177,14 +177,16 @@ GameMainScene::GameMainScene()
 		bubble[i] = nullptr;
 	}
 
-	enemy[0] = new Enemy(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+	enemy[0] = new Enemy(SCREEN_WIDTH / 2 - 10, SCREEN_HEIGHT / 2);
 	enemy[0]->SetMapData(Stage[Level]);
 
-	enemy[1] = new Enemy(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2);
+	enemy[1] = new Enemy(SCREEN_WIDTH / 2 - 110, SCREEN_HEIGHT / 2);
 	enemy[1]->SetMapData(Stage[Level]);
 
-	enemy[2] = new Enemy(SCREEN_WIDTH / 2 + 100, SCREEN_HEIGHT / 2);
+	enemy[2] = new Enemy(SCREEN_WIDTH / 2 + 90, SCREEN_HEIGHT / 2);
 	enemy[2]->SetMapData(Stage[Level]);
+
+	//画像読み込み-----------------------------------------
 
 	//地面
 	Ground[0] = LoadGraph("images/GroundA.png");
@@ -210,12 +212,29 @@ GameMainScene::GameMainScene()
 
 	//海
 	Ground[10] = LoadGraph("images/Sea.png");
+
+	//魚
+	LoadDivGraph("images/Fish.png", 10, 5, 2, 64, 64, FishImg);
+
+	//----------------------------------------------------------
 }
 
 AbstractScene* GameMainScene::Update() 
 {
-	//プレイヤー更新
-	player.Update();
+
+	if (player.GetY() < SCREEN_HEIGHT)
+	{
+		//プレイヤー更新
+		player.Update();
+	}
+	else
+	{
+		if (120 < ++Miss) 
+		{
+			Miss = 0;
+			player.Reset();
+		}
+	}
 
 	//敵更新
 	for (int i = 0; i < ENEMY_MAX; i++)
@@ -245,11 +264,11 @@ AbstractScene* GameMainScene::Update()
 			Score += enemy[i]->AddScore();
 
 			//海に落ちたらその敵が消えて泡を出す
-			if (SCREEN_HEIGHT < enemy[i]->GetY()) 
+			if (SCREEN_HEIGHT < enemy[i]->GetY())
 			{
 				for (int s = 0; s < ENEMY_MAX; s++)
 				{
-					if (bubble[s] == nullptr)
+					if (bubble[s] == nullptr && enemy[i]->GetCondition() != 4)
 					{
 						bubble[s] = new Bubble(enemy[i]->GetX(), SCREEN_HEIGHT);
 						break;
@@ -301,12 +320,146 @@ AbstractScene* GameMainScene::Update()
 	}
 
 #endif // DEBUG
+
+	//魚更新
+	Fish();
+
 	return this;
 }
 
 void GameMainScene::Fish()
 {
-	
+
+	bool Approach = false;	//プレイヤーか敵が海面に接近しているならtrueになる
+
+
+	//魚が出現していない場合
+	if (!Encount) 
+	{
+		//プレイヤーが海面に近づいているか判定
+		if (SCREEN_HEIGHT - BLOCK_SIZE * 5 < player.GetY())
+		{
+			Approach = true;
+			//魚が現れる座標をセット
+			FishX = player.GetX();
+
+			//ターゲットを設定
+			Target = ENEMY_MAX;
+		}
+
+		//敵が海面に近づいているか判定
+		for (int i = 0; i < ENEMY_MAX; i++)
+		{
+			if (enemy[i] != nullptr)
+			{
+				if (SCREEN_HEIGHT - BLOCK_SIZE * 5 < enemy[i]->GetY())
+				{
+					Approach = true;
+					//魚が現れる座標をセット
+					FishX = enemy[i]->GetX();
+
+					//ターゲットを設定
+					Target = i;
+					break;
+				}
+			}
+		}
+
+		//海面に誰かが接近しているならカウントを進める
+		if (Approach)
+		{
+			FishTime++;
+
+			//誰かが接近して3秒経過すると2秒ごとに魚が出現する判定
+			if (180 < FishTime && FishTime % 120 == 0)
+			{
+				//確率で魚が出現してカウントをリセット
+				int Check = GetRand(99);
+				if (Check < 99)
+				{
+					Encount = true;
+					Attack = true;
+					FishTime = 0;
+				}
+			}
+		}
+	}
+	//魚が出現している場合
+	else 
+	{
+		//カウントを進める
+		if (Attack || FishEat)FishTime++;
+		else FishTime--;
+
+		//ターゲットが海面に近いか判定
+		//ターゲットがプレイヤー
+		if (Target == ENEMY_MAX)
+		{
+			//プレイヤーが海面に近づいているか判定
+			if (SCREEN_HEIGHT - BLOCK_SIZE * 5 < player.GetY())
+			{
+				Approach = true;
+				//魚の現れる座標をセット
+				FishX = player.GetX();
+			}
+			else 
+			{
+				Attack = false;
+			}
+		}
+		//ターゲットが敵
+		else if (0 <= Target && Target < ENEMY_MAX)
+		{
+			if (enemy[Target] != nullptr)
+			{
+				//該当の敵が海面に近づいているか判定
+				if (SCREEN_HEIGHT - BLOCK_SIZE * 5 < enemy[Target]->GetY())
+				{
+					Approach = true;
+					//魚の現れる座標をセット
+					FishX = enemy[Target]->GetX();
+				}
+			}
+			else
+			{
+				Attack = false;
+			}
+		}
+
+		//魚がキャラを食べる判定
+		if (FishTime == 30 && Attack) 
+		{
+			if (Target == ENEMY_MAX)
+			{
+				//プレイヤーが海面に近づいているか判定
+				if (Approach)
+				{
+					player.Eaten();
+					FishEat = 1;
+				}
+			}
+			else if (0 <= Target && Target < ENEMY_MAX) 
+			{
+				if (enemy[Target] != nullptr)
+				{
+					if (Approach)
+					{
+						enemy[Target]->Eaten();
+						FishEat = 2;
+					}
+				}
+			}
+		}
+		
+		//カウントが一定以上になったら出現(Encount)をfalseにする
+		if (60 < FishTime || FishTime < 0)
+		{
+			FishTime = 0;
+			FishEat = 0;
+			Encount = false;
+			Attack = false;
+		}
+	}
 }
 
 void GameMainScene::Draw() const
@@ -314,6 +467,7 @@ void GameMainScene::Draw() const
 #ifdef DEBUG
 	DrawFormatString(100, 50, 0xffffff, "STAGE %d", Level + 1);
 	DrawFormatString(200, 50, 0xffffff, "SCORE %d", Score);
+	DrawFormatString(300, 50, 0xffffff, "FISH %d", FishTime);
 	DrawFormatString(100, 100, 0xffffff, "PRESS START");
 #endif // DEBUG
 
@@ -422,6 +576,7 @@ void GameMainScene::Draw() const
 	if (Level + 1 <= 3) DrawGraph(SIDE_MARGIN, SCREEN_HEIGHT - 80, Ground[0], true);
 	else				DrawGraph(SIDE_MARGIN, SCREEN_HEIGHT - 80, Ground[1], true);
 
+	//プレイヤー更新
 	player.Draw();
 
 	//敵更新
@@ -435,6 +590,26 @@ void GameMainScene::Draw() const
 		if (bubble[i] != nullptr)
 		{
 			bubble[i]->Draw();
+		}
+	}
+
+	//魚
+	if (Encount) 
+	{
+		if (FishTime < 30)
+		{
+			int FishY = (BLOCK_SIZE * 2.3) / 30 * FishTime;
+			if (FishTime < 15)DrawRotaGraph2(SIDE_MARGIN + FishX, SCREEN_HEIGHT - FishY, 32, 64, 1, 0, FishImg[0], true);
+			else if (FishTime < 25)DrawRotaGraph2(SIDE_MARGIN + FishX, SCREEN_HEIGHT - FishY, 32, 64, 1, 0, FishImg[1], true);
+			else if (FishTime < 30)DrawRotaGraph2(SIDE_MARGIN + FishX, SCREEN_HEIGHT - FishY, 32, 64, 1, 0, FishImg[2], true);
+		}
+		else if (FishTime < 60)
+		{
+			int FishY = (BLOCK_SIZE * 2.3) - (BLOCK_SIZE * 1.1) / 30 * (FishTime - 30);
+			if (FishTime < 40)DrawRotaGraph2(SIDE_MARGIN + FishX, SCREEN_HEIGHT - FishY, 32, 64, 1, 0, FishImg[5 + FishEat], true);
+			else if (FishTime < 47)DrawRotaGraph2(SIDE_MARGIN + FishX, SCREEN_HEIGHT - FishY, 32, 64, 1, 0, FishImg[3], true);
+			else if (FishTime < 54)DrawRotaGraph2(SIDE_MARGIN + FishX, SCREEN_HEIGHT - FishY, 32, 64, 1, 0, FishImg[4], true);
+			else if (FishTime < 60)DrawRotaGraph2(SIDE_MARGIN + FishX, SCREEN_HEIGHT - FishY, 32, 64, 1, 0, FishImg[5], true);
 		}
 	}
 
