@@ -24,6 +24,7 @@ void Player::Update() {
 	InitPad();
 	int BlockSize = BLOCK_SIZE;
 
+	//通常の状態
 	if (Condition == 0 || Condition == 1)
 	{
 		//上下移動-----------------------------------------------------------
@@ -170,6 +171,7 @@ void Player::Update() {
 
 		if (WallHit)Speed *= -0.9;
 	}
+	//ミス
 	else if (Condition == 2)
 	{
 		float FallMax = 4;		//落下の最大速度
@@ -179,9 +181,16 @@ void Player::Update() {
 
 		Y += fall;
 	}
+	//魚に食べられた
 	else if (Condition == 3)
 	{
 		Y = SCREEN_HEIGHT + 1;
+	}
+	//雷に当たった
+	else if (Condition == 4)
+	{
+		if (60 < ++Anim)Condition = 2;
+		fall = -3;
 	}
 
 	GameTime++;
@@ -218,6 +227,7 @@ void Player::Reset()
 	
 	Balloon = 2;
 	Condition = 0;
+	Anim = 0;
 
 	JumpCount = 0;
 }
@@ -249,7 +259,7 @@ void Player::Draw() const {
 		DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[16 + Move], true, Turn);
 	}
 	//待機
-	else if (Condition != 2 && Speed == 0)
+	else if (Condition < 2 && Speed == 0)
 	{
 		Move = GameTime / 25 % 3;
 
@@ -291,9 +301,19 @@ void Player::Draw() const {
 			DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[8 + Move], true, Turn);
 		}
 	}
+	//ミス
 	else if (Condition == 2)
 	{
 		Move = abs(-2 + (GameTime / 3 % 4));
+		//ゲーム画面分の間隔をあけて3体描画する
+		DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[21 + Move], true, Turn);
+		DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[21 + Move], true, Turn);
+		DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[21 + Move], true, Turn);
+	}
+	//雷に当たった
+	else if (Condition == 4)
+	{
+		Move = (Anim / 3 % 2) * 8;
 		//ゲーム画面分の間隔をあけて3体描画する
 		DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[21 + Move], true, Turn);
 		DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[21 + Move], true, Turn);

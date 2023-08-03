@@ -25,7 +25,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     //Œã‚ÅŽg‚¤‚æ
 
-    SceneManager sceneMng((AbstractScene*)new Title());
+    SceneManager sceneMng((AbstractScene*)new Title(10000));
 
     Fps fps;
 

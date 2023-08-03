@@ -4,9 +4,11 @@
 
 class Title : public AbstractScene {
 private:
+	//メインシーンに引き継ぐハイスコア
+	int Hiscore;
 
 public:
-	Title();
+	Title(int Hiscore);
 
 	~Title() {};
 

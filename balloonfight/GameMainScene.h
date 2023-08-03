@@ -4,6 +4,8 @@
 #include"Player.h"
 #include"Enemy.h"
 #include"Bubble.h"
+#include"Cloud.h"
+#include"Thunder.h"
 
 
 class GameMainScene : public AbstractScene
@@ -12,13 +14,25 @@ private:
 	Player player;
 	Enemy** enemy;
 	Bubble** bubble;
+	Cloud** cloud;
+	Thunder** thunder;
 
 	int Level;	//ステージ数
 	int Score;	//スコア
+	int Hiscore;//ハイスコア
+
+	int Stock;	//プレイヤーのライフ
+	int Gameover;	//ゲームオーバー演出の管理
 
 	int Miss = 0;	//プレイヤーがミスしてから復活するまでの時間
 
+	int Time;	//ゲーム経過時間
+
+	//画像関連
 	int Ground[11];	//足場
+	int Num[10];	//数字
+	int Icon[5];	//アイコン類
+
 
 	//さかな関連のステータス
 	bool Turn = false;		//魚の向き
@@ -31,13 +45,15 @@ private:
 
 	int FishImg[10];	//画像
 
+
 public:
-	GameMainScene();
+	GameMainScene(int Hiscore);
 	//デストラクト
 	virtual ~GameMainScene()
 	{
 		delete enemy;//newを作ったらdeleteを作る
-		delete bubble;//newを作ったらdeleteを作る
+		delete bubble;
+		delete cloud;
 	};
 
 	virtual AbstractScene* Update()override;

@@ -33,7 +33,7 @@ void Enemy::Update(float Px, float Py) {
 		{
 			Flying = true;
 		}
-		else if (Flying && 100 < Py - Y)
+		else if (Flying && 100 < Py - Y && JumpCount == 0)
 		{
 			Flying = false;
 		}
@@ -85,8 +85,9 @@ void Enemy::Update(float Px, float Py) {
 			{
 				fall = 0;
 			}
-			JumpCount = 60;
-			SlideTime = 120;
+			JumpCount = 90 + GetRand(120);
+			SlideTime = JumpCount;
+			Flying = true;
 		}
 
 		//左右移動-------------------------------------------
@@ -98,9 +99,9 @@ void Enemy::Update(float Px, float Py) {
 
 		//移動する方向と時間を決める
 
-		if (Flying && SlideTime == 0)
+		if (Flying)
 		{
-			SlideTime = GetRand(30) + 60;
+			if (SlideTime == 0)SlideTime = GetRand(30) + 60;
 			if (Px >= X)
 			{
 				//プレイヤーの真下にいなければ右に加速 そうでなければ左に加速
@@ -197,9 +198,16 @@ void Enemy::Update(float Px, float Py) {
 
 		if (WallHit)Speed *= -0.9;
 	}
+	//飛び上がる準備をする
 	else if (Condition == 0)
 	{
-		if (240 < ++Takeoff)Condition = 1;
+		if (240 < ++Takeoff)
+		{
+			JumpCount = 90 + GetRand(60);
+			SlideTime = JumpCount;
+			Flying = true;
+			Condition = 1;
+		}
 
 		Y += 5;
 
@@ -218,6 +226,7 @@ void Enemy::Update(float Px, float Py) {
 			SlideTime = 120;
 		}
 	}
+	//パラシュートで落下する
 	else if (Condition == 2)
 	{
 		Takeoff++;
@@ -304,6 +313,7 @@ void Enemy::Update(float Px, float Py) {
 			}
 		}
 	}
+	//倒される
 	else if (Condition == 3) 
 	{
 		float FallMax = 4;		//落下の最大速度
@@ -313,6 +323,7 @@ void Enemy::Update(float Px, float Py) {
 
 		Y += fall;
 	}
+	//魚に食べられる
 	else if (Condition == 4) 
 	{
 		Y = SCREEN_HEIGHT + 1;

@@ -1,14 +1,15 @@
 #include"TitleScene.h"
 #include"GameMainScene.h"
 
-Title::Title() {
+Title::Title(int Hiscore) {
+	this->Hiscore = Hiscore;
 }
 
 AbstractScene* Title::Update() {
 	
 	if (PAD_INPUT::OnButton(XINPUT_BUTTON_B)) 
 	{
-		return new GameMainScene();
+		return new GameMainScene(Hiscore);
 	}
 
 	return this;
