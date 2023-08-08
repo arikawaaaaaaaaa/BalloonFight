@@ -22,7 +22,8 @@ private:
 	int Hiscore;//ハイスコア
 
 	int Stock;	//プレイヤーのライフ
-	int Gameover;	//ゲームオーバー演出の管理
+	int StageClear = 0;	//ステージクリア演出の管理
+	int Gameover = 0;	//ゲームオーバー演出の管理
 
 	int Miss = 0;	//プレイヤーがミスしてから復活するまでの時間
 
@@ -51,7 +52,7 @@ public:
 	//デストラクト
 	virtual ~GameMainScene()
 	{
-		delete enemy;//newを作ったらdeleteを作る
+		delete enemy;
 		delete bubble;
 		delete cloud;
 	};
@@ -62,4 +63,7 @@ public:
 
 	//魚が現れる
 	void Fish();
+
+	//ステージ配置
+	void SetStage();
 };

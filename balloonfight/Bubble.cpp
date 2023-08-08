@@ -10,7 +10,7 @@ Bubble::Bubble(float X, float Y) {
 	LeftX = X - Width;
 	RightX = X + Width;
 
-	MaxSpeed = (1.f + GetRand(1)) + (0.1f * GetRand(9));
+	MaxSpeed = 1.f + (0.1f * GetRand(9));
 	Speed = 0;
 	Angle = 1;
 

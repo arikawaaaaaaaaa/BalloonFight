@@ -614,7 +614,7 @@ int Enemy::AddScore()
 //敵同士で触れる(X座標、Y座標、幅、高さ)
 void Enemy::HitEnemy(float Ex, float Ey, float Ew, float Eh)
 {
-	if (fabs(Ex - X) < Width * 2 && fabs(Ey - Y) < Height * 2 && Condition != 2)
+	if (fabs(Ex - X) < Width * 2 && fabs(Ey - Y) < Height * 2 && Condition != 3)
 	{
 		//敵に触れて跳ね返る
 		enum Angle

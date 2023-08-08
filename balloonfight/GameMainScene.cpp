@@ -245,7 +245,7 @@ GameMainScene::GameMainScene(int Hiscore)
 AbstractScene* GameMainScene::Update()
 {
 
-	if (!Gameover)
+	if (!Gameover && !StageClear)
 	{
 
 		if (player.GetY() < SCREEN_HEIGHT)
@@ -425,18 +425,7 @@ AbstractScene* GameMainScene::Update()
 			player.SetMapData(Stage[Level]);
 			player.Reset();
 
-			for (int i = 0; i < ENEMY_MAX; i++)
-			{
-				enemy[i] = nullptr;
-			}
-			enemy[0] = new Enemy(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
-			enemy[0]->SetMapData(Stage[Level]);
-
-			enemy[1] = new Enemy(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2);
-			enemy[1]->SetMapData(Stage[Level]);
-
-			enemy[2] = new Enemy(SCREEN_WIDTH / 2 + 100, SCREEN_HEIGHT / 2);
-			enemy[2]->SetMapData(Stage[Level]);
+			SetStage();
 		}
 
 #endif // DEBUG
@@ -447,13 +436,43 @@ AbstractScene* GameMainScene::Update()
 		//ハイスコア更新
 		if (Hiscore < Score)Hiscore = Score;
 
+		//ステージクリア確認
+		bool Clear = true;	//ステージクリア判定の結果
+		for (int i = 0; i < ENEMY_MAX; i++)
+		{
+			if (enemy[i] != nullptr) 
+			{
+				//生存している敵がいるなら結果をfalseにしてループを抜ける
+				if (enemy[i]->GetCondition() <= 2) 
+				{
+					Clear = false;
+					break;
+				}
+			}
+		}
+
+		//判定結果がtrue(生存している敵がいない)ならステージクリア演出を開始する
+		if (Clear)StageClear++;
+
 		Time++;
 	}
-	else
+	else if (0 < Gameover)
 	{
 		if (500 < ++Gameover) 
 		{
 			return new Title(Hiscore);
+		}
+	}
+	else if (0 < StageClear) 
+	{
+		if (150 < ++StageClear) 
+		{
+			if (++Level > 4)Level = 0;
+			player.SetMapData(Stage[Level]);
+			player.Reset();
+
+			SetStage();
+			StageClear = 0;
 		}
 	}
 
@@ -595,6 +614,124 @@ void GameMainScene::Fish()
 	}
 }
 
+void GameMainScene::SetStage() 
+{
+	for (int i = 0; i < ENEMY_MAX; i++)
+	{
+		enemy[i] = nullptr;
+		bubble[i] = nullptr;
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		cloud[i] = nullptr;
+		thunder[i] = nullptr;
+	}
+
+	switch (Level)
+	{
+	case 0:
+		enemy[0] = new Enemy(SCREEN_WIDTH / 2 - 10, SCREEN_HEIGHT / 2);
+		enemy[0]->SetMapData(Stage[Level]);
+
+		enemy[1] = new Enemy(SCREEN_WIDTH / 2 - 110, SCREEN_HEIGHT / 2);
+		enemy[1]->SetMapData(Stage[Level]);
+
+		enemy[2] = new Enemy(SCREEN_WIDTH / 2 + 90, SCREEN_HEIGHT / 2);
+		enemy[2]->SetMapData(Stage[Level]);
+
+		cloud[0] = new Cloud(SCREEN_WIDTH / 2 + 40, 120);
+
+		break;
+
+	case 1:
+		enemy[0] = new Enemy(SCREEN_WIDTH / 2 - 10, SCREEN_HEIGHT / 2);
+		enemy[0]->SetMapData(Stage[Level]);
+
+		enemy[1] = new Enemy(SCREEN_WIDTH / 2 - 110, SCREEN_HEIGHT / 2);
+		enemy[1]->SetMapData(Stage[Level]);
+
+		enemy[2] = new Enemy(SCREEN_WIDTH / 2 + 90, SCREEN_HEIGHT / 2);
+		enemy[2]->SetMapData(Stage[Level]);
+
+		enemy[3] = new Enemy(150, 110);
+		enemy[3]->SetMapData(Stage[Level]);
+
+		enemy[4] = new Enemy(490, 90);
+		enemy[4]->SetMapData(Stage[Level]);
+
+		cloud[0] = new Cloud(110, 230);
+		cloud[1] = new Cloud(490, 190);
+		break;
+
+	case 2:
+		enemy[0] = new Enemy(210, 73);
+		enemy[0]->SetMapData(Stage[Level]);
+
+		enemy[1] = new Enemy(505, 73);
+		enemy[1]->SetMapData(Stage[Level]);
+
+		enemy[2] = new Enemy(334, 130);
+		enemy[2]->SetMapData(Stage[Level]);
+
+		enemy[3] = new Enemy(180, 225);
+		enemy[3]->SetMapData(Stage[Level]);
+
+		enemy[4] = new Enemy(305, 320);
+		enemy[4]->SetMapData(Stage[Level]);
+
+		cloud[0] = new Cloud(110, 150);
+		cloud[1] = new Cloud(460, 270);
+		break;
+
+	case 3:
+		enemy[0] = new Enemy(330, 130);
+		enemy[0]->SetMapData(Stage[Level]);
+
+		enemy[1] = new Enemy(140, 205);
+		enemy[1]->SetMapData(Stage[Level]);
+
+		enemy[2] = new Enemy(465, 225);
+		enemy[2]->SetMapData(Stage[Level]);
+
+		enemy[3] = new Enemy(260, 244);
+		enemy[3]->SetMapData(Stage[Level]);
+
+		enemy[4] = new Enemy(370, 320);
+		enemy[4]->SetMapData(Stage[Level]);
+
+		cloud[0] = new Cloud(190, 100);
+		cloud[1] = new Cloud(510, 150);
+		break;
+
+	case 4:
+		enemy[0] = new Enemy(222, 54);
+		enemy[0]->SetMapData(Stage[Level]);
+
+		enemy[1] = new Enemy(483, 111);
+		enemy[1]->SetMapData(Stage[Level]);
+
+		enemy[2] = new Enemy(241, 130);
+		enemy[2]->SetMapData(Stage[Level]);
+
+		enemy[3] = new Enemy(104, 168);
+		enemy[3]->SetMapData(Stage[Level]);
+
+		enemy[4] = new Enemy(218, 301);
+		enemy[4]->SetMapData(Stage[Level]);
+
+		enemy[5] = new Enemy(387, 301);
+		enemy[5]->SetMapData(Stage[Level]);
+
+		cloud[0] = new Cloud(110, 110);
+		cloud[1] = new Cloud(380, 130);
+		break;
+
+	default:
+		break;
+	}
+}
+
 void GameMainScene::Draw() const
 {
 #ifdef DEBUG
@@ -616,38 +753,38 @@ void GameMainScene::Draw() const
 	//UI表示-------------------------------------------
 
 	//プレイヤースコア
-	DrawGraph(BLOCK_SIZE * 3, 0, Icon[0], true);
+	DrawGraph(BLOCK_SIZE * 3, BLOCK_SIZE * 1, Icon[0], true);
 
-	DrawGraph(BLOCK_SIZE * 4, 0, Num[Score / 100000 % 10], true);
-	DrawGraph(BLOCK_SIZE * 5, 0, Num[Score / 10000 % 10], true);
-	DrawGraph(BLOCK_SIZE * 6, 0, Num[Score / 1000 % 10], true);
-	DrawGraph(BLOCK_SIZE * 7, 0, Num[Score / 100 % 10], true);
-	DrawGraph(BLOCK_SIZE * 8, 0, Num[Score / 10 % 10], true);
-	DrawGraph(BLOCK_SIZE * 9, 0, Num[Score % 10], true);
+	DrawGraph(BLOCK_SIZE * 4, BLOCK_SIZE * 1, Num[Score / 100000 % 10], true);
+	DrawGraph(BLOCK_SIZE * 5, BLOCK_SIZE * 1, Num[Score / 10000 % 10], true);
+	DrawGraph(BLOCK_SIZE * 6, BLOCK_SIZE * 1, Num[Score / 1000 % 10], true);
+	DrawGraph(BLOCK_SIZE * 7, BLOCK_SIZE * 1, Num[Score / 100 % 10], true);
+	DrawGraph(BLOCK_SIZE * 8, BLOCK_SIZE * 1, Num[Score / 10 % 10], true);
+	DrawGraph(BLOCK_SIZE * 9, BLOCK_SIZE * 1, Num[Score % 10], true);
 
 	//ハイスコア
-	DrawGraph(BLOCK_SIZE * 12, 0, Icon[1], true);
+	DrawGraph(BLOCK_SIZE * 12, BLOCK_SIZE * 1, Icon[1], true);
 
-	DrawGraph(BLOCK_SIZE * 14, 0, Num[Hiscore / 100000 % 10], true);
-	DrawGraph(BLOCK_SIZE * 15, 0, Num[Hiscore / 10000 % 10], true);
-	DrawGraph(BLOCK_SIZE * 16, 0, Num[Hiscore / 1000 % 10], true);
-	DrawGraph(BLOCK_SIZE * 17, 0, Num[Hiscore / 100 % 10], true);
-	DrawGraph(BLOCK_SIZE * 18, 0, Num[Hiscore / 10 % 10], true);
-	DrawGraph(BLOCK_SIZE * 19, 0, Num[Hiscore % 10], true);
+	DrawGraph(BLOCK_SIZE * 14, BLOCK_SIZE * 1, Num[Hiscore / 100000 % 10], true);
+	DrawGraph(BLOCK_SIZE * 15, BLOCK_SIZE * 1, Num[Hiscore / 10000 % 10], true);
+	DrawGraph(BLOCK_SIZE * 16, BLOCK_SIZE * 1, Num[Hiscore / 1000 % 10], true);
+	DrawGraph(BLOCK_SIZE * 17, BLOCK_SIZE * 1, Num[Hiscore / 100 % 10], true);
+	DrawGraph(BLOCK_SIZE * 18, BLOCK_SIZE * 1, Num[Hiscore / 10 % 10], true);
+	DrawGraph(BLOCK_SIZE * 19, BLOCK_SIZE * 1, Num[Hiscore % 10], true);
 
 	//残機数
 	for (int i = 0; i < Stock; i++)
 	{
-		DrawGraph(BLOCK_SIZE * (8 - i), BLOCK_SIZE * 1, Icon[3], true);
+		DrawGraph(BLOCK_SIZE * (8 - i), BLOCK_SIZE * 2, Icon[3], true);
 	}
 	
 	//現在フェーズ数
 	if (Time < 240 && Time % 60 < 30) 
 	{
-		DrawGraph(BLOCK_SIZE * 12, BLOCK_SIZE * 1, Icon[2], true);
+		DrawGraph(BLOCK_SIZE * 12, BLOCK_SIZE * 2, Icon[2], true);
 
-		DrawGraph(BLOCK_SIZE * 18, BLOCK_SIZE * 1, Num[0], true);
-		DrawGraph(BLOCK_SIZE * 19, BLOCK_SIZE * 1, Num[0], true);
+		DrawGraph(BLOCK_SIZE * 18, BLOCK_SIZE * 2, Num[0], true);
+		DrawGraph(BLOCK_SIZE * 19, BLOCK_SIZE * 2, Num[0], true);
 	}
 
 	//-------------------------------------------------

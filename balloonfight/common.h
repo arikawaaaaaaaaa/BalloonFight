@@ -23,4 +23,4 @@
 #define BLOCK_SIZE GAME_WIDTH / MAP_WIDTH
 
 //УGВћН≈СеРФ
-#define ENEMY_MAX 5
+#define ENEMY_MAX 6
