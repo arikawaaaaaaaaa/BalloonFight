@@ -1,12 +1,13 @@
 ﻿#include"DxLib.h"
 #include"TitleScene.h"
+#include"Sound.h"
 #include"GameMainScene.h"
 #include"AbstractScene.h"
 
 #include<math.h>
 #include<stdlib.h>
 
-#define DEBUG
+//#define DEBUG
 
 int Stage[5][MAP_HEIGHT][MAP_WIDTH] =
 {
@@ -165,6 +166,7 @@ int Stage[5][MAP_HEIGHT][MAP_WIDTH] =
 GameMainScene::GameMainScene(int Hiscore)
 {
 	Level = 0;
+	Phase = 1;
 	Score = 0;
 	this->Hiscore = Hiscore;
 	player.SetMapData(Stage[Level]);
@@ -180,6 +182,15 @@ GameMainScene::GameMainScene(int Hiscore)
 	{
 		enemy[i] = nullptr;
 		bubble[i] = nullptr;
+
+		Splash[i].Active = false;
+		Splash[i].Time = 0;
+		Splash[i].X = 0;
+
+		drawscore[i].X = 0;
+		drawscore[i].Y = 0;
+		drawscore[i].Time = 0;
+		drawscore[i].Imagenum = 0;
 	}
 
 	for (int i = 0; i < 2; i++)
@@ -239,7 +250,15 @@ GameMainScene::GameMainScene(int Hiscore)
 	//魚
 	LoadDivGraph("images/Fish.png", 10, 5, 2, 64, 64, FishImg);
 
+	//水しぶき
+	LoadDivGraph("images/Splash.png", 4, 4, 1, 64, 32, SplashImg);
+
+	//獲得スコア表示
+	LoadDivGraph("images/ScoreNum.png", 5, 5, 1, 32, 32, ScoreImg);
+
 	//----------------------------------------------------------
+
+	Sound::PlayStart();
 }
 
 AbstractScene* GameMainScene::Update()
@@ -247,22 +266,31 @@ AbstractScene* GameMainScene::Update()
 
 	if (!Gameover && !StageClear)
 	{
-
+		//プレーヤーが海に沈んでいないか判定
 		if (player.GetY() < SCREEN_HEIGHT)
 		{
 			//プレイヤー更新
 			player.Update();
 		}
+		//プレイヤーが海に沈んでいる場合
 		else
 		{
-			player.Miss();
+			//プレイヤーの状態をミスにする
+			if (player.GetCondition() != 3)
+			{
+				player.Miss();
+			}
+			//ミス後の待機時間をカウントする
 			if (120 < ++Miss)
 			{
+				//待機時間が終了した時に行う処理
 				Miss = 0;
+				//残機が残っている場合、残機を1減らしてプレイヤーの状態をリセットする。
 				if (0 <= --Stock)
 				{
 					player.Reset();
 				}
+				//残機が残っていない場合、ゲームオーバーに移行する。
 				else
 				{
 					Gameover++;
@@ -281,9 +309,12 @@ AbstractScene* GameMainScene::Update()
 				//敵とプレイヤーの当たり
 				if (enemy[i]->GetCondition() != 0 && enemy[i]->GetCondition() != 3 && player.GetCondition() < 2)
 				{
-					player.HitEnemy(enemy[i]->GetX(), enemy[i]->GetY(), enemy[i]->GetWidth(), enemy[i]->GetHeight());
+					player.HitEnemy(enemy[i]->GetX(), enemy[i]->GetY(), enemy[i]->GetWidth(), enemy[i]->GetHeight(), enemy[i]->GetCondition());
 				}
-				enemy[i]->HitPlayer(player.GetX(), player.GetY(), player.GetWidth(), player.GetHeight());
+				if (player.GetCondition() < 2)
+				{
+					enemy[i]->HitPlayer(player.GetX(), player.GetY(), player.GetWidth(), player.GetHeight());
+				}
 
 				//敵同士の当たり
 				for (int j = 0; j < ENEMY_MAX; j++)
@@ -300,17 +331,64 @@ AbstractScene* GameMainScene::Update()
 				//海に落ちたらその敵が消えて泡を出す
 				if (SCREEN_HEIGHT < enemy[i]->GetY())
 				{
-					for (int s = 0; s < ENEMY_MAX; s++)
+					//水しぶきを上げる
+					if (!enemy[i]->SpawnBubble() && enemy[i]->GetCondition() != 4)
 					{
-						if (bubble[s] == nullptr && enemy[i]->GetCondition() != 4)
+						Splash[i].Active = true;
+						Splash[i].Time = 20;
+						Splash[i].X = enemy[i]->GetX();
+					}
+					//泡を出す
+					if (!enemy[i]->SpawnBubble())
+					{
+						bubble[i] = new Bubble(enemy[i]->GetX(), SCREEN_HEIGHT);
+						enemy[i]->TrueBubble();
+					}
+					if (!enemy[i]->DrawingScore())enemy[i] = nullptr;
+				}
+			}
+		}
+
+		//敵関連のサウンド管理
+
+		bool stopJump = true;
+		bool stopPara = true;
+		for (int i = 0; i < ENEMY_MAX; i++)
+		{
+			if (enemy[i] != nullptr)
+			{
+				//パラシュート効果音を鳴らす
+				if (enemy[i]->GetCondition() == 2)
+				{
+					stopPara = false;
+					if (!Sound::CheckParachute())
+					{
+						Sound::PlayParachute();
+						break;
+					}
+				}
+				//ジャンプ効果音を鳴らす
+				else
+				{
+					if (enemy[i]->GetJump())
+					{
+						stopJump = false;
+						if (enemy[i]->GetCondition() == 1 && !Sound::CheckEnemyJump() && !Sound::CheckStart())
 						{
-							bubble[s] = new Bubble(enemy[i]->GetX(), SCREEN_HEIGHT);
+							Sound::PlayEnemyJump();
 							break;
 						}
 					}
-					enemy[i] = nullptr;
 				}
 			}
+		}
+		if (stopJump || Sound::CheckParachute())
+		{
+			Sound::StopEnemyJump();
+		}
+		if (stopPara)
+		{
+			Sound::StopParachute();
 		}
 
 		//泡更新
@@ -326,7 +404,29 @@ AbstractScene* GameMainScene::Update()
 				//スコアを加算する
 				Score += bubble[i]->AddScore();
 
-				if (bubble[i]->Burst())bubble[i] = nullptr;
+				if (bubble[i]->Burst())
+				{
+					drawscore[i].X = player.GetX();
+					drawscore[i].Y = player.GetY();
+					drawscore[i].Time = 90;
+					drawscore[i].Imagenum = 0;
+
+					bubble[i] = nullptr;
+				}
+			}
+		}
+
+		//水しぶき更新
+		for (int i = 0; i < ENEMY_MAX; i++)
+		{
+			if (Splash[i].Active)
+			{
+				if (--Splash[i].Time <= 0)
+				{
+					Splash[i].Active = false;
+					Splash[i].X = 0;
+					Splash[i].Time = 0;
+				}
 			}
 		}
 
@@ -454,6 +554,15 @@ AbstractScene* GameMainScene::Update()
 		//判定結果がtrue(生存している敵がいない)ならステージクリア演出を開始する
 		if (Clear)StageClear++;
 
+		//獲得スコア表示の更新
+		for (int i = 0; i < ENEMY_MAX; i++)
+		{
+			if (0 < drawscore[i].Time)
+			{
+				drawscore[i].Time--;
+			}
+		}
+
 		Time++;
 	}
 	else if (0 < Gameover)
@@ -465,14 +574,25 @@ AbstractScene* GameMainScene::Update()
 	}
 	else if (0 < StageClear) 
 	{
+		//ステージクリア時の処理
 		if (150 < ++StageClear) 
 		{
+			//次に使うステージを切り替える
 			if (++Level > 4)Level = 0;
+
+			//プレイヤー情報のリセット
 			player.SetMapData(Stage[Level]);
 			player.Reset();
 
+			//次のステージをセットする
 			SetStage();
+
+			//ゲーム経過時間をリセット
 			StageClear = 0;
+			Time = 0;
+
+			//突破ステージ数をカウント
+			Phase++;
 		}
 	}
 
@@ -502,7 +622,7 @@ void GameMainScene::Fish()
 		//敵が海面に近づいているか判定
 		for (int i = 0; i < ENEMY_MAX; i++)
 		{
-			if (enemy[i] != nullptr)
+			if (enemy[i] != nullptr && !(SCREEN_HEIGHT < enemy[i]->GetY()))
 			{
 				if (SCREEN_HEIGHT - BLOCK_SIZE * 5 < enemy[i]->GetY())
 				{
@@ -562,7 +682,7 @@ void GameMainScene::Fish()
 		//ターゲットが敵
 		else if (0 <= Target && Target < ENEMY_MAX)
 		{
-			if (enemy[Target] != nullptr)
+			if (enemy[Target] != nullptr && !(SCREEN_HEIGHT < enemy[Target]->GetY()))
 			{
 				//該当の敵が海面に近づいているか判定
 				if (SCREEN_HEIGHT - BLOCK_SIZE * 5 < enemy[Target]->GetY())
@@ -616,18 +736,38 @@ void GameMainScene::Fish()
 
 void GameMainScene::SetStage() 
 {
+	//敵を一旦全リセット
 	for (int i = 0; i < ENEMY_MAX; i++)
 	{
 		enemy[i] = nullptr;
 		bubble[i] = nullptr;
+
+		Splash[i].Active = false;
+		Splash[i].Time = 0;
+		Splash[i].X = 0;
+
+		drawscore[i].X = 0;
+		drawscore[i].Y = 0;
+		drawscore[i].Time = 0;
+		drawscore[i].Imagenum = 0;
 	}
 
+	//雲を一旦全リセット
 	for (int i = 0; i < 2; i++)
 	{
 		cloud[i] = nullptr;
 		thunder[i] = nullptr;
 	}
 
+	//魚ステータスをリセット
+	Encount = false;
+	Attack = false;
+	FishTime = 0;
+	FishX = 0;
+	Target = 0;
+	FishEat = 0;
+
+	//次のステージに応じて敵と雲を配置する
 	switch (Level)
 	{
 	case 0:
@@ -730,6 +870,8 @@ void GameMainScene::SetStage()
 	default:
 		break;
 	}
+
+	Sound::PlayStart();
 }
 
 void GameMainScene::Draw() const
@@ -783,8 +925,17 @@ void GameMainScene::Draw() const
 	{
 		DrawGraph(BLOCK_SIZE * 12, BLOCK_SIZE * 2, Icon[2], true);
 
-		DrawGraph(BLOCK_SIZE * 18, BLOCK_SIZE * 2, Num[0], true);
-		DrawGraph(BLOCK_SIZE * 19, BLOCK_SIZE * 2, Num[0], true);
+		DrawGraph(BLOCK_SIZE * 18, BLOCK_SIZE * 2, Num[Phase / 10 % 10], true);
+		DrawGraph(BLOCK_SIZE * 19, BLOCK_SIZE * 2, Num[Phase % 10], true);
+	}
+
+	//獲得スコア表示
+	for (int i = 0; i < ENEMY_MAX; i++)
+	{
+		if (0 < drawscore[i].Time)
+		{
+			DrawRotaGraph(SIDE_MARGIN + drawscore[i].X, drawscore[i].Y - 32, 1, 0, ScoreImg[drawscore[i].Imagenum], true);
+		}
 	}
 
 	//-------------------------------------------------
@@ -942,6 +1093,24 @@ void GameMainScene::Draw() const
 
 	//海
 	DrawGraph(SIDE_MARGIN, SCREEN_HEIGHT - 80, Ground[10], true);
+
+	//水しぶき
+	//プレイヤーの水しぶき
+	int Flame = 5;
+	if (0 < Miss && Miss < Flame * 4 && player.GetCondition() != 3)
+	{
+		int step = Miss / Flame % 4;
+		DrawRotaGraph(SIDE_MARGIN + player.GetX(), SCREEN_HEIGHT - BLOCK_SIZE * 3.5, 1, 0, SplashImg[0 + step], true);
+	}
+	//敵の水しぶき
+	for (int i = 0; i < ENEMY_MAX; i++)
+	{
+		if (Splash[i].Active)
+		{
+			int step = (Flame * 4 - Splash[i].Time) / Flame % 4;
+			DrawRotaGraph(SIDE_MARGIN + Splash[i].X, SCREEN_HEIGHT - BLOCK_SIZE * 3.5, 1, 0, SplashImg[0 + step], true);
+		}
+	}
 
 	//ゲームオーバー表示
 	if (Gameover)

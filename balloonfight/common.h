@@ -24,3 +24,12 @@
 
 //敵の最大数
 #define ENEMY_MAX 6
+
+//スコア表示
+struct DrawScore
+{
+	int X;
+	int Y;
+	int Imagenum;
+	int Time;
+};

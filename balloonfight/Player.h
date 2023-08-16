@@ -47,15 +47,15 @@ public:
 	void Reset();	//位置リセット
 
 	//座標取得
-	float GetX() { return X; }
-	float GetY() { return Y; }
+	float GetX() const { return X; }
+	float GetY() const { return Y; }
 
 	//高さ、幅の取得
-	float GetWidth() { return Width; }
-	float GetHeight() { return Height; }
+	float GetWidth() const { return Width; }
+	float GetHeight() const { return Height; }
 
 	//状態の取得
-	int GetCondition() { return Condition; }
+	int GetCondition() const { return Condition; }
 
 	//ミスした
 	void Miss() { Condition = 2; }
@@ -69,5 +69,5 @@ public:
 		Anim = 0;
 	}
 
-	void HitEnemy(float Ex, float Ey, float Ew, float Eh);	//敵に触れる(X座標、Y座標、幅、高さ)
+	void HitEnemy(float Ex, float Ey, float Ew, float Eh, int Con);	//敵に触れる(X座標、Y座標、幅、高さ、敵の状態)
 };

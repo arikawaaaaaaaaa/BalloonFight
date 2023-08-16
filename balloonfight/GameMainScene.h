@@ -7,6 +7,13 @@
 #include"Cloud.h"
 #include"Thunder.h"
 
+//敵の水しぶきのデータ
+struct Death
+{
+	bool Active;
+	int X;
+	int Time;
+};
 
 class GameMainScene : public AbstractScene
 {
@@ -18,6 +25,7 @@ private:
 	Thunder** thunder;
 
 	int Level;	//ステージ数
+	int Phase;	//突破ステージ数
 	int Score;	//スコア
 	int Hiscore;//ハイスコア
 
@@ -25,7 +33,10 @@ private:
 	int StageClear = 0;	//ステージクリア演出の管理
 	int Gameover = 0;	//ゲームオーバー演出の管理
 
+	DrawScore drawscore[ENEMY_MAX];	//獲得スコア表示
+
 	int Miss = 0;	//プレイヤーがミスしてから復活するまでの時間
+	Death Splash[ENEMY_MAX];	//敵の水しぶきを管理する
 
 	int Time;	//ゲーム経過時間
 
@@ -33,7 +44,8 @@ private:
 	int Ground[11];	//足場
 	int Num[10];	//数字
 	int Icon[5];	//アイコン類
-
+	int SplashImg[4];	//水しぶき
+	int ScoreImg[5];	//獲得スコア表示
 
 	//さかな関連のステータス
 	bool Turn = false;		//魚の向き

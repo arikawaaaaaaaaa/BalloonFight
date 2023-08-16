@@ -1,6 +1,7 @@
 ﻿#include "Player.h"
 #include"DxLib.h"
 #include"PadInput.h"
+#include"Sound.h"
 #include"common.h"
 #include <math.h>
 
@@ -225,7 +226,10 @@ void Player::Reset()
 	Speed = 0;
 	fall = 1; 
 	
-	Balloon = 2;
+	if (Condition == 2 || Condition == 3)
+	{
+		Balloon = 2;
+	}
 	Condition = 0;
 	Anim = 0;
 
@@ -343,19 +347,22 @@ void Player::SetMapData(int MapData[MAP_HEIGHT][MAP_WIDTH]) {
 }
 
 //敵に触れる(X座標、Y座標、幅、高さ)
-void Player::HitEnemy(float Ex, float Ey, float Ew, float Eh)
+void Player::HitEnemy(float Ex, float Ey, float Ew, float Eh, int con)
 {
 	if (fabs(Ex - X) < Width * 2 && fabs(Ey - Y) < Height * 2 && Condition != 2)
 	{
 		DrawFormatString(500, 100, 0xffffff, "HIT");
 		//敵に風船を割られる
-		if (fabs((Ey + Eh) - (Y - Height)) < Height)
+		if (fabs((Ey + Eh) - (Y - Height)) < Height && con < 2)
 		{
 			//風船の数が2個の場合、風船を一個減らす
 			if (Balloon == 2 && !Vincible)
 			{
 				Vincible = 12;
 				Balloon = 1;
+
+				Sound::PlayCrack();
+
 				return;
 			}
 			//風船の数が1個の場合、ミスの状態にする
@@ -365,6 +372,9 @@ void Player::HitEnemy(float Ex, float Ey, float Ew, float Eh)
 				Speed = 0;
 				fall = -3;
 				Condition = 2;
+
+				Sound::PlayCrack();
+
 				return;
 			}
 		}

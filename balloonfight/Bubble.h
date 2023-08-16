@@ -26,6 +26,7 @@ private:
 	int BurstTime = 0;	//–A‚ªŠ„‚ç‚ê‚Ä‚©‚çÁ‚¦‚é‚Ü‚Å‚ÌŠÔ
 
 	int Score = 0;	//Šl“¾ƒXƒRƒA
+
 public:
 
 	Bubble(float X, float Y);

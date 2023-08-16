@@ -1,6 +1,7 @@
 ﻿#include "Enemy.h"
 #include"DxLib.h"
 #include"PadInput.h"
+#include"Sound.h"
 #include"common.h"
 #include <math.h>
 
@@ -15,8 +16,18 @@ Enemy::Enemy(float X, float Y) {
 	fall = 1;
 
 	JumpCount = 0;
+	Takeoff = 300;
+
+	for (int i = 0; i < 2; i++)
+	{
+		drawscore[i].X = 0;
+		drawscore[i].Y = 0;
+		drawscore[i].Time = 0;
+		drawscore[i].Imagenum = 0;
+	}
 
 	LoadDivGraph("images/EnemyA.png", 18, 6, 3, 64, 64, Image);
+	LoadDivGraph("images/ScoreNum.png", 5, 5, 1, 32, 32, ScoreImg);
 }
 
 void Enemy::Update(float Px, float Py) {
@@ -201,7 +212,7 @@ void Enemy::Update(float Px, float Py) {
 	//飛び上がる準備をする
 	else if (Condition == 0)
 	{
-		if (240 < ++Takeoff)
+		if (480 < ++Takeoff)
 		{
 			JumpCount = 90 + GetRand(60);
 			SlideTime = JumpCount;
@@ -329,6 +340,14 @@ void Enemy::Update(float Px, float Py) {
 		Y = SCREEN_HEIGHT + 1;
 	}
 
+	//獲得スコア表示の更新
+	for (int i = 0; i < 2; i++)
+	{
+		if (0 < drawscore[i].Time)
+		{
+			drawscore[i].Time--;
+		}
+	}
 	GameTime++;
 }
 
@@ -367,7 +386,16 @@ void Enemy::Draw() const {
 	//DrawBox(SIDE_MARGIN + X - Width - GAME_WIDTH, Y - Height, SIDE_MARGIN + X + Width - GAME_WIDTH, Y + Height, 0xff0000, true);
 	//DrawBox(SIDE_MARGIN + X - Width + GAME_WIDTH, Y - Height, SIDE_MARGIN + X + Width + GAME_WIDTH, Y + Height, 0xff0000, true);
 
-	//プレイヤー描画
+	//獲得スコア表示
+	for (int i = 0; i < 2; i++)
+	{
+		if (0 < drawscore[i].Time)
+		{
+			DrawRotaGraph(SIDE_MARGIN + drawscore[i].X, drawscore[i].Y - 32, 1, 0, ScoreImg[drawscore[i].Imagenum], true);
+		}
+	}
+
+	//敵描画
 	int Move = 0;
 
 	//空中移動
@@ -386,31 +414,31 @@ void Enemy::Draw() const {
 	{
 		Move = GameTime / 12 % 2;
 		//ゲーム画面分の間隔をあけて3体描画する
-		if (Takeoff <= 60)
+		if (Takeoff <= 300)
 		{
 			DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[0], true, Turn);
 			DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[0], true, Turn);
 			DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[0], true, Turn);
 		}
-		else if (Takeoff <= 120)
+		else if (Takeoff <= 360)
 		{
 			DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[0 + Move], true, Turn);
 			DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[0 + Move], true, Turn);
 			DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[0 + Move], true, Turn);
 		}
-		else if (Takeoff <= 120 + (12 * 3))
+		else if (Takeoff <= 360 + (12 * 3))
 		{
 			DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[2 + Move], true, Turn);
 			DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[2 + Move], true, Turn);
 			DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[2 + Move], true, Turn);
 		}
-		else if (Takeoff <= 120 + (12 * 5))
+		else if (Takeoff <= 360 + (12 * 5))
 		{
 			DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[4 + Move], true, Turn);
 			DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[4 + Move], true, Turn);
 			DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[4 + Move], true, Turn);
 		}
-		else if (Takeoff <= 240)
+		else if (Takeoff <= 480)
 		{
 			DrawRotaGraph2(SIDE_MARGIN + X, Y, 32, 64 - Height, 1, 0, Image[6 + Move], true, Turn);
 			DrawRotaGraph2(SIDE_MARGIN + X - GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[6 + Move], true, Turn);
@@ -418,6 +446,7 @@ void Enemy::Draw() const {
 		}
 
 	}
+	//パラシュート
 	else if (Condition == 2) 
 	{
 		//ゲーム画面分の間隔をあけて3体描画する
@@ -446,6 +475,7 @@ void Enemy::Draw() const {
 			DrawRotaGraph2(SIDE_MARGIN + X + GAME_WIDTH, Y, 32, 64 - Height, 1, 0, Image[17], true, Turn);
 		}
 	}
+	//倒された
 	else if (Condition == 3)
 	{
 		Move = GameTime / 3 % 2;
@@ -491,10 +521,24 @@ void Enemy::HitPlayer(float Px, float Py, float Pw, float Ph)
 
 				//スコアを加算する
 				Score = 500;
+				
+				//スコア表示をセットする
+				for (int i = 0; i < 2; i++)
+				{
+					if (drawscore[i].Time <= 0) 
+					{
+						drawscore[i].X = X;
+						drawscore[i].Y = Y;
+						drawscore[i].Imagenum = 0;
+						drawscore[i].Time = 90;
+						break;
+					}
+				}
 
 				if (Px < X)Paraangle = -1;
 				else	   Paraangle = 1;
 
+				Sound::PlayCrack();
 				return;
 			}
 			//パラシュートを壊されて撃破される
@@ -510,6 +554,19 @@ void Enemy::HitPlayer(float Px, float Py, float Pw, float Ph)
 
 				//スコアを加算する
 				Score = 1000;
+
+				//スコア表示をセットする
+				for (int i = 0; i < 2; i++)
+				{
+					if (drawscore[i].Time <= 0)
+					{
+						drawscore[i].X = X;
+						drawscore[i].Y = Y;
+						drawscore[i].Imagenum = 2;
+						drawscore[i].Time = 90;
+						break;
+					}
+				}
 				return;
 			}
 		}
@@ -526,6 +583,19 @@ void Enemy::HitPlayer(float Px, float Py, float Pw, float Ph)
 
 			//スコアを加算する
 			Score = 750;
+
+			//スコア表示をセットする
+			for (int i = 0; i < 2; i++)
+			{
+				if (drawscore[i].Time <= 0)
+				{
+					drawscore[i].X = X;
+					drawscore[i].Y = Y;
+					drawscore[i].Imagenum = 1;
+					drawscore[i].Time = 90;
+					break;
+				}
+			}
 			return;
 		}
 

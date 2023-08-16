@@ -157,6 +157,7 @@
     <ClCompile Include="PadInput.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="SceneManager.cpp" />
+    <ClCompile Include="Sound.cpp" />
     <ClCompile Include="Thunder.cpp" />
     <ClCompile Include="TitleScene.cpp" />
   </ItemGroup>
@@ -171,6 +172,7 @@
     <ClInclude Include="PadInput.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="Sound.h" />
     <ClInclude Include="Thunder.h" />
     <ClInclude Include="TitleScene.h" />
   </ItemGroup>

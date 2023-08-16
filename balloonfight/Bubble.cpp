@@ -41,11 +41,11 @@ void Bubble::Update(float Px, float Py) {
 		if (X <= 0)X = GAME_WIDTH - 1;		//画面左端時
 		else if (GAME_WIDTH <= X)X = 0 + 1;	//画面右端時
 
-		//プレイヤー右端の座標を更新
+		//右端の座標を更新
 		LeftX = X - Width;
 		if (LeftX <= 0)LeftX = GAME_WIDTH + LeftX;
 
-		//プレイヤー左端の座標を更新
+		//左端の座標を更新
 		RightX = X + Width;
 		if (GAME_WIDTH <= RightX)RightX = RightX - GAME_WIDTH;
 
@@ -67,7 +67,7 @@ void Bubble::Draw() const {
 	//DrawBox(SIDE_MARGIN + X - Width - GAME_WIDTH, Y - Height, SIDE_MARGIN + X + Width - GAME_WIDTH, Y + Height, 0xff0000, true);
 	//DrawBox(SIDE_MARGIN + X - Width + GAME_WIDTH, Y - Height, SIDE_MARGIN + X + Width + GAME_WIDTH, Y + Height, 0xff0000, true);
 
-	//プレイヤー描画
+	//泡描画
 	int Move = 0;
 
 	//空中移動
@@ -100,7 +100,10 @@ void Bubble::HitPlayer(float Px, float Py, float Pw, float Ph)
 {
 	if (fabs(Px - X) < Width * 2 && fabs(Py - Y) < Height * 2)
 	{
-		if (!Hit)Score = 500;
+		if (!Hit)
+		{
+			Score = 500;
+		}
 		Hit = true;
 	}
 }

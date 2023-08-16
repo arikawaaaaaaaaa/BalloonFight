@@ -36,6 +36,11 @@ private:
 
 	int Score = 0;	//獲得スコア
 
+	bool Bubble = false;	//海に沈んで泡を出したならtrueになる
+
+	DrawScore drawscore[2];	//獲得スコア表示
+	int ScoreImg[5];
+
 	int MapData[MAP_HEIGHT][MAP_WIDTH];	//マップデータ
 
 public:
@@ -49,18 +54,33 @@ public:
 	void FixX();	//画面端のワープと左右端の座標の更新
 
 	//座標取得
-	float GetX() { return X; }
-	float GetY() { return Y; }
+	float GetX() const { return X; }
+	float GetY() const { return Y; }
 
 	//高さ、幅の取得
-	float GetWidth() { return Width; }
-	float GetHeight() { return Height; }
+	float GetWidth() const { return Width; }
+	float GetHeight() const { return Height; }
+
+	bool GetJump() const { return Flying; }
 
 	//敵状態の取得
-	int GetCondition() { return Condition; }
+	int GetCondition() const { return Condition; }
 
 	//スコア加算
 	int AddScore();
+
+	//泡を出したかどうかを返す
+	bool SpawnBubble() const { return Bubble; }
+	
+	//泡を出した時の処理
+	void TrueBubble() { Bubble = true; }
+
+	//スコア描画状況を返す
+	bool DrawingScore()const
+	{
+		if (drawscore[0].Time <= 0 && drawscore[1].Time <= 0) return true;
+		else return false;
+	}
 
 	//魚に食べられた
 	void Eaten() { Condition = 4; }

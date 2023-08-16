@@ -1,6 +1,7 @@
 #include "DxLib.h"
 #include "common.h"
 #include "PadInput.h"
+#include "Sound.h"
 #include "SceneManager.h"
 #include "Fps.h"
 
@@ -28,6 +29,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     SceneManager sceneMng((AbstractScene*)new Title(10000));
 
     Fps fps;
+
+    Sound::LoadSound();
 
     //ÉQÅ[ÉÄÉãÅ[Év
     while (ProcessMessage() == 0 && sceneMng.Update() != nullptr)
