@@ -275,9 +275,18 @@ AbstractScene* GameMainScene::Update()
 		//プレイヤーが海に沈んでいる場合
 		else
 		{
+			if (Sound::CheckFall())
+			{
+				Sound::PlaySplash();
+				Sound::StopFall();
+			}
 			//プレイヤーの状態をミスにする
 			if (player.GetCondition() != 3)
 			{
+				if (player.GetCondition() != 2)
+				{
+					Sound::PlaySplash();
+				}
 				player.Miss();
 			}
 			//ミス後の待機時間をカウントする
@@ -288,12 +297,16 @@ AbstractScene* GameMainScene::Update()
 				//残機が残っている場合、残機を1減らしてプレイヤーの状態をリセットする。
 				if (0 <= --Stock)
 				{
+					if(!Sound::CheckStart())Sound::PlayRestart();
 					player.Reset();
 				}
 				//残機が残っていない場合、ゲームオーバーに移行する。
 				else
 				{
 					Gameover++;
+					Sound::StopAll();
+					Sound::PlayGameOver();
+					return this;
 				}
 			}
 		}
@@ -334,6 +347,7 @@ AbstractScene* GameMainScene::Update()
 					//水しぶきを上げる
 					if (!enemy[i]->SpawnBubble() && enemy[i]->GetCondition() != 4)
 					{
+						Sound::PlaySplash();
 						Splash[i].Active = true;
 						Splash[i].Time = 20;
 						Splash[i].X = enemy[i]->GetX();
@@ -361,7 +375,7 @@ AbstractScene* GameMainScene::Update()
 				if (enemy[i]->GetCondition() == 2)
 				{
 					stopPara = false;
-					if (!Sound::CheckParachute())
+					if (!Sound::CheckParachute() && !Sound::CheckDefeat() && !Sound::CheckStart() && !Sound::CheckEatable())
 					{
 						Sound::PlayParachute();
 						break;
@@ -373,7 +387,7 @@ AbstractScene* GameMainScene::Update()
 					if (enemy[i]->GetJump())
 					{
 						stopJump = false;
-						if (enemy[i]->GetCondition() == 1 && !Sound::CheckEnemyJump() && !Sound::CheckStart())
+						if (enemy[i]->GetCondition() == 1 && !Sound::CheckAll())
 						{
 							Sound::PlayEnemyJump();
 							break;
@@ -574,6 +588,11 @@ AbstractScene* GameMainScene::Update()
 	}
 	else if (0 < StageClear) 
 	{
+		if (StageClear < 30 && !Sound::CheckClear())
+		{
+			Sound::StopAll();
+			Sound::PlayClear();
+		}
 		//ステージクリア時の処理
 		if (150 < ++StageClear) 
 		{
@@ -603,7 +622,6 @@ void GameMainScene::Fish()
 {
 
 	bool Approach = false;	//プレイヤーか敵が海面に接近しているならtrueになる
-
 
 	//魚が出現していない場合
 	if (!Encount) 
@@ -707,6 +725,11 @@ void GameMainScene::Fish()
 				if (Approach)
 				{
 					player.Eaten();
+					if (!Sound::CheckEatable())
+					{
+						Sound::StopAll();
+						Sound::PlayEatable();
+					}
 					FishEat = 1;
 				}
 			}
@@ -717,6 +740,11 @@ void GameMainScene::Fish()
 					if (Approach)
 					{
 						enemy[Target]->Eaten();
+						if (!Sound::CheckEatable())
+						{
+							Sound::StopAll();
+							Sound::PlayEatable();
+						}
 						FishEat = 2;
 					}
 				}
@@ -871,7 +899,7 @@ void GameMainScene::SetStage()
 		break;
 	}
 
-	Sound::PlayStart();
+	//Sound::PlayStart();
 }
 
 void GameMainScene::Draw() const
@@ -891,6 +919,9 @@ void GameMainScene::Draw() const
 	//{
 	//	DrawLine(0, BLOCK_SIZE * i, SCREEN_WIDTH, BLOCK_SIZE * i, 0xffffff);
 	//}
+
+	//ステージクリア後暗転
+	if (140 < StageClear)return;
 
 	//UI表示-------------------------------------------
 

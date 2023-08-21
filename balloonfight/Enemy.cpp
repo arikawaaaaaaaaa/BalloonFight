@@ -567,6 +567,9 @@ void Enemy::HitPlayer(float Px, float Py, float Pw, float Ph)
 						break;
 					}
 				}
+
+				Sound::StopAll();
+				Sound::PlayDefeat();
 				return;
 			}
 		}

@@ -34,6 +34,7 @@ void Player::Update() {
 
 		if (!JumpCount && (PAD_INPUT::OnButton(XINPUT_BUTTON_B) || PAD_INPUT::OnPressed(XINPUT_BUTTON_A)))
 		{
+			if (!Sound::CheckPlayerJump() && !Sound::CheckStart())Sound::PlayPlayerJump();
 			JumpCount = 12;
 			Anim = 0;
 			//if (Ground)fall = JumpPow * 12;
@@ -94,6 +95,7 @@ void Player::Update() {
 		{
 			if (PadX >= 0.3) {
 				if (Speed < 0 && Condition == 0)Speed += 0.2;
+				if (Condition == 0 && !Sound::CheckStart() && !Sound::CheckPlayerWalk())Sound::PlayPlayerWalk();
 				Turn = true;
 				Speed += 0.2;
 				Anim++;
@@ -101,6 +103,7 @@ void Player::Update() {
 			}
 			else if (PadX <= -0.3) {
 				if (0 < Speed && Condition == 0)Speed -= 0.2;
+				if (Condition == 0 && !Sound::CheckStart() && !Sound::CheckPlayerWalk())Sound::PlayPlayerWalk();
 				Turn = false;
 				Speed -= 0.2;
 				Anim++;
@@ -190,7 +193,11 @@ void Player::Update() {
 	//雷に当たった
 	else if (Condition == 4)
 	{
-		if (60 < ++Anim)Condition = 2;
+		if (60 < ++Anim)
+		{
+			Sound::PlayFall();
+			Condition = 2;
+		}
 		fall = -3;
 	}
 
@@ -374,7 +381,7 @@ void Player::HitEnemy(float Ex, float Ey, float Ew, float Eh, int con)
 				Condition = 2;
 
 				Sound::PlayCrack();
-
+				Sound::PlayFall();
 				return;
 			}
 		}

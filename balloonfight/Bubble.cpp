@@ -1,6 +1,7 @@
 #include "Bubble.h"
 #include"DxLib.h"
 #include"common.h"
+#include"Sound.h"
 #include <math.h>
 
 Bubble::Bubble(float X, float Y) {
@@ -102,6 +103,8 @@ void Bubble::HitPlayer(float Px, float Py, float Pw, float Ph)
 	{
 		if (!Hit)
 		{
+			Sound::StopAll();
+			Sound::PlayBubble();
 			Score = 500;
 		}
 		Hit = true;
