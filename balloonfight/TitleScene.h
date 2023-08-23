@@ -7,6 +7,13 @@ private:
 	//メインシーンに引き継ぐハイスコア
 	int Hiscore;
 
+	//タイトル画像
+	int TitleImg;
+	int Icon[4];
+
+	//アニメーション管理用
+	int Anim = 0;
+
 public:
 	Title(int Hiscore);
 

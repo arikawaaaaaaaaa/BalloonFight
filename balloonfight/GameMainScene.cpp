@@ -557,7 +557,7 @@ AbstractScene* GameMainScene::Update()
 			if (enemy[i] != nullptr) 
 			{
 				//生存している敵がいるなら結果をfalseにしてループを抜ける
-				if (enemy[i]->GetCondition() <= 2) 
+				if (enemy[i]->GetCondition() <= 2 && enemy[i]->GetY() < SCREEN_HEIGHT)
 				{
 					Clear = false;
 					break;
