@@ -199,13 +199,13 @@ GameMainScene::GameMainScene(int Hiscore)
 		thunder[i] = nullptr;
 	}
 
-	enemy[0] = new Enemy(SCREEN_WIDTH / 2 - 10, SCREEN_HEIGHT / 2);
+	enemy[0] = new Enemy(SCREEN_WIDTH / 2 - 10, SCREEN_HEIGHT / 2, 0);
 	enemy[0]->SetMapData(Stage[Level]);
 
-	enemy[1] = new Enemy(SCREEN_WIDTH / 2 - 110, SCREEN_HEIGHT / 2);
+	enemy[1] = new Enemy(SCREEN_WIDTH / 2 - 110, SCREEN_HEIGHT / 2, 0);
 	enemy[1]->SetMapData(Stage[Level]);
 
-	enemy[2] = new Enemy(SCREEN_WIDTH / 2 + 90, SCREEN_HEIGHT / 2);
+	enemy[2] = new Enemy(SCREEN_WIDTH / 2 + 90, SCREEN_HEIGHT / 2, 0);
 	enemy[2]->SetMapData(Stage[Level]);
 
 	cloud[0] = new Cloud(SCREEN_WIDTH / 2 + 40, 120);
@@ -358,7 +358,8 @@ AbstractScene* GameMainScene::Update()
 						bubble[i] = new Bubble(enemy[i]->GetX(), SCREEN_HEIGHT);
 						enemy[i]->TrueBubble();
 					}
-					if (!enemy[i]->DrawingScore())enemy[i] = nullptr;
+
+					if (enemy[i]->DrawingScore())enemy[i] = nullptr;
 				}
 			}
 		}
@@ -413,7 +414,10 @@ AbstractScene* GameMainScene::Update()
 				//敵情報の更新
 				bubble[i]->Update(player.GetX(), player.GetY());
 
-				bubble[i]->HitPlayer(player.GetX(), player.GetY(), player.GetWidth(), player.GetHeight());
+				if (player.GetCondition() <= 1)
+				{
+					bubble[i]->HitPlayer(player.GetX(), player.GetY(), player.GetWidth(), player.GetHeight());
+				}
 
 				//スコアを加算する
 				Score += bubble[i]->AddScore();
@@ -799,13 +803,13 @@ void GameMainScene::SetStage()
 	switch (Level)
 	{
 	case 0:
-		enemy[0] = new Enemy(SCREEN_WIDTH / 2 - 10, SCREEN_HEIGHT / 2);
+		enemy[0] = new Enemy(SCREEN_WIDTH / 2 - 10, SCREEN_HEIGHT / 2, 0);
 		enemy[0]->SetMapData(Stage[Level]);
 
-		enemy[1] = new Enemy(SCREEN_WIDTH / 2 - 110, SCREEN_HEIGHT / 2);
+		enemy[1] = new Enemy(SCREEN_WIDTH / 2 - 110, SCREEN_HEIGHT / 2, 0);
 		enemy[1]->SetMapData(Stage[Level]);
 
-		enemy[2] = new Enemy(SCREEN_WIDTH / 2 + 90, SCREEN_HEIGHT / 2);
+		enemy[2] = new Enemy(SCREEN_WIDTH / 2 + 90, SCREEN_HEIGHT / 2, 0);
 		enemy[2]->SetMapData(Stage[Level]);
 
 		cloud[0] = new Cloud(SCREEN_WIDTH / 2 + 40, 120);
@@ -813,19 +817,19 @@ void GameMainScene::SetStage()
 		break;
 
 	case 1:
-		enemy[0] = new Enemy(SCREEN_WIDTH / 2 - 10, SCREEN_HEIGHT / 2);
+		enemy[0] = new Enemy(SCREEN_WIDTH / 2 - 10, SCREEN_HEIGHT / 2, 0);
 		enemy[0]->SetMapData(Stage[Level]);
 
-		enemy[1] = new Enemy(SCREEN_WIDTH / 2 - 110, SCREEN_HEIGHT / 2);
+		enemy[1] = new Enemy(SCREEN_WIDTH / 2 - 110, SCREEN_HEIGHT / 2, 0);
 		enemy[1]->SetMapData(Stage[Level]);
 
-		enemy[2] = new Enemy(SCREEN_WIDTH / 2 + 90, SCREEN_HEIGHT / 2);
+		enemy[2] = new Enemy(SCREEN_WIDTH / 2 + 90, SCREEN_HEIGHT / 2, 0);
 		enemy[2]->SetMapData(Stage[Level]);
 
-		enemy[3] = new Enemy(150, 110);
+		enemy[3] = new Enemy(150, 110, 1);
 		enemy[3]->SetMapData(Stage[Level]);
 
-		enemy[4] = new Enemy(490, 90);
+		enemy[4] = new Enemy(490, 90, 1);
 		enemy[4]->SetMapData(Stage[Level]);
 
 		cloud[0] = new Cloud(110, 230);
@@ -833,19 +837,19 @@ void GameMainScene::SetStage()
 		break;
 
 	case 2:
-		enemy[0] = new Enemy(210, 73);
+		enemy[0] = new Enemy(210, 73, 2);
 		enemy[0]->SetMapData(Stage[Level]);
 
-		enemy[1] = new Enemy(505, 73);
+		enemy[1] = new Enemy(505, 73, 2);
 		enemy[1]->SetMapData(Stage[Level]);
 
-		enemy[2] = new Enemy(334, 130);
+		enemy[2] = new Enemy(334, 130, 1);
 		enemy[2]->SetMapData(Stage[Level]);
 
-		enemy[3] = new Enemy(180, 225);
+		enemy[3] = new Enemy(180, 225, 1);
 		enemy[3]->SetMapData(Stage[Level]);
 
-		enemy[4] = new Enemy(305, 320);
+		enemy[4] = new Enemy(305, 320, 0);
 		enemy[4]->SetMapData(Stage[Level]);
 
 		cloud[0] = new Cloud(110, 150);
@@ -853,19 +857,19 @@ void GameMainScene::SetStage()
 		break;
 
 	case 3:
-		enemy[0] = new Enemy(330, 130);
+		enemy[0] = new Enemy(330, 130, 1);
 		enemy[0]->SetMapData(Stage[Level]);
 
-		enemy[1] = new Enemy(140, 205);
+		enemy[1] = new Enemy(140, 205, 0);
 		enemy[1]->SetMapData(Stage[Level]);
 
-		enemy[2] = new Enemy(465, 225);
+		enemy[2] = new Enemy(465, 225, 0);
 		enemy[2]->SetMapData(Stage[Level]);
 
-		enemy[3] = new Enemy(260, 244);
+		enemy[3] = new Enemy(260, 244, 0);
 		enemy[3]->SetMapData(Stage[Level]);
 
-		enemy[4] = new Enemy(370, 320);
+		enemy[4] = new Enemy(370, 320, 2);
 		enemy[4]->SetMapData(Stage[Level]);
 
 		cloud[0] = new Cloud(190, 100);
@@ -873,22 +877,22 @@ void GameMainScene::SetStage()
 		break;
 
 	case 4:
-		enemy[0] = new Enemy(222, 54);
+		enemy[0] = new Enemy(222, 54, 2);
 		enemy[0]->SetMapData(Stage[Level]);
 
-		enemy[1] = new Enemy(483, 111);
+		enemy[1] = new Enemy(483, 111, 1);
 		enemy[1]->SetMapData(Stage[Level]);
 
-		enemy[2] = new Enemy(241, 130);
+		enemy[2] = new Enemy(241, 130, 1);
 		enemy[2]->SetMapData(Stage[Level]);
 
-		enemy[3] = new Enemy(104, 168);
+		enemy[3] = new Enemy(104, 168, 1);
 		enemy[3]->SetMapData(Stage[Level]);
 
-		enemy[4] = new Enemy(218, 301);
+		enemy[4] = new Enemy(218, 301, 0);
 		enemy[4]->SetMapData(Stage[Level]);
 
-		enemy[5] = new Enemy(387, 301);
+		enemy[5] = new Enemy(387, 301, 0);
 		enemy[5]->SetMapData(Stage[Level]);
 
 		cloud[0] = new Cloud(110, 110);
@@ -958,15 +962,6 @@ void GameMainScene::Draw() const
 
 		DrawGraph(BLOCK_SIZE * 18, BLOCK_SIZE * 2, Num[Phase / 10 % 10], true);
 		DrawGraph(BLOCK_SIZE * 19, BLOCK_SIZE * 2, Num[Phase % 10], true);
-	}
-
-	//獲得スコア表示
-	for (int i = 0; i < ENEMY_MAX; i++)
-	{
-		if (0 < drawscore[i].Time)
-		{
-			DrawRotaGraph(SIDE_MARGIN + drawscore[i].X, drawscore[i].Y - 32, 1, 0, ScoreImg[drawscore[i].Imagenum], true);
-		}
 	}
 
 	//-------------------------------------------------
@@ -1072,6 +1067,15 @@ void GameMainScene::Draw() const
 		if (cloud[i] != nullptr)
 		{
 			cloud[i]->Draw();
+		}
+	}
+
+	//獲得スコア表示
+	for (int i = 0; i < ENEMY_MAX; i++)
+	{
+		if (0 < drawscore[i].Time)
+		{
+			DrawRotaGraph(SIDE_MARGIN + drawscore[i].X, drawscore[i].Y - 32, 1, 0, ScoreImg[drawscore[i].Imagenum], true);
 		}
 	}
 

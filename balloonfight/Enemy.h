@@ -6,6 +6,7 @@ class Enemy
 {
 private:
 
+	int Level;	//敵の強さ (0:ピンク 1:緑 2:黄)
 	float X, Y;	//敵座標
 	float LeftX, RightX;	//敵の左右端座標
 
@@ -29,7 +30,9 @@ private:
 
 	float PadX;	//横方向入力値
 
-	int Image[18];	//画像
+	int ImageA[18];	//画像・ピンク
+	int ImageB[18];	//画像・緑
+	int ImageC[18];	//画像・黄
 	int Anim = 0;	//アニメーション管理
 
 	int GameTime = 0;	//経過時間
@@ -45,7 +48,7 @@ private:
 
 public:
 
-	Enemy(float X, float Y);
+	Enemy(float X, float Y, int Level);
 	void Update(float Px, float Py);
 	void Draw() const;
 
